@@ -7,10 +7,11 @@ module BiochemVarInTransferMod
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (He et al. 2023)
+! Sep 13, 2026: NoahmpIO%xx change to 1-D vector for MPAS, Cenlin He (NCAR)
 ! -------------------------------------------------------------------------
 
   use Machine
-  use NoahmpIOVarType
+  use NoahmpIOVarType, only : NoahmpIO_type
   use NoahmpVarType
 
   implicit none
@@ -121,24 +122,34 @@ contains
        noahmp%biochem%param%TurnoverCoeffRootCrop   = NoahmpIO%RT_OVRC_TABLE  (CropType,:)
 
        if ( OptCropModel == 1 ) then
-          noahmp%biochem%param%DatePlanting         = NoahmpIO%PLANTING(I)
-          noahmp%biochem%param%DateHarvest          = NoahmpIO%HARVEST(I)
-          noahmp%biochem%param%GrowDegDayEmerg      = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
+          if ( (NoahmpIO%PLANTING(I)>0) .and. (NoahmpIO%PLANTING(I)<367) ) then
+             noahmp%biochem%param%DatePlanting      = NoahmpIO%PLANTING(I)
+          endif ! 2D input map exist
+          if ( (NoahmpIO%HARVEST(I)>0) .and. (NoahmpIO%HARVEST(I)<367) ) then
+             noahmp%biochem%param%DateHarvest       = NoahmpIO%HARVEST(I)
+          endif ! 2D input map exist
+          if ( (NoahmpIO%SEASON_GDD(I)>0.0) .and. (NoahmpIO%SEASON_GDD(I)<10000.0) ) then
+             noahmp%biochem%param%GrowDegDayEmerg   = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
                                                       noahmp%biochem%param%GrowDegDayEmerg
-          noahmp%biochem%param%GrowDegDayInitVeg    = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
+             noahmp%biochem%param%GrowDegDayInitVeg = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
                                                       noahmp%biochem%param%GrowDegDayInitVeg
-          noahmp%biochem%param%GrowDegDayPostVeg    = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
+             noahmp%biochem%param%GrowDegDayPostVeg = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
                                                       noahmp%biochem%param%GrowDegDayPostVeg
-          noahmp%biochem%param%GrowDegDayInitReprod = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
-                                                      noahmp%biochem%param%GrowDegDayInitReprod
-          noahmp%biochem%param%GrowDegDayMature     = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
+             noahmp%biochem%param%GrowDegDayInitReprod = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
+                                                         noahmp%biochem%param%GrowDegDayInitReprod
+             noahmp%biochem%param%GrowDegDayMature  = NoahmpIO%SEASON_GDD(I) / 1770.0 * &
                                                       noahmp%biochem%param%GrowDegDayMature
-        endif
+          endif ! 2D input map exist
+       endif ! OptCropModel == 1
     endif ! activate crop parameters
 
     if ( noahmp%config%nmlist%OptIrrigation == 2 ) then
-       noahmp%biochem%param%DatePlanting = NoahmpIO%PLANTING(I)
-       noahmp%biochem%param%DateHarvest  = NoahmpIO%HARVEST (I)
+       if ( (NoahmpIO%PLANTING(I)>0) .and. (NoahmpIO%PLANTING(I)<367) ) then
+          noahmp%biochem%param%DatePlanting = NoahmpIO%PLANTING(I)
+       endif ! 2D input map exist
+       if ( (NoahmpIO%HARVEST(I)>0) .and. (NoahmpIO%HARVEST(I)<367) ) then
+          noahmp%biochem%param%DateHarvest  = NoahmpIO%HARVEST (I)
+       endif ! 2D input map exist
     endif
     
     end associate

@@ -26,13 +26,10 @@ contains
 
 ! local variable
     integer                          :: LoopInd                       ! do loop/array indices
-    real(kind=kind_noahmp)           :: InflowSnowLayer               ! water flow into each snow layer [mm/s]
-    real(kind=kind_noahmp)           :: OutflowSnowLayer              ! water flow out of each snow layer [mm/s]
+    real(kind=kind_noahmp)           :: InflowSnowLayer               ! water flow into each snow layer [mm]
     real(kind=kind_noahmp)           :: SnowIceTmp                    ! ice mass after minus sublimation
     real(kind=kind_noahmp)           :: SnowWaterRatio                ! ratio of SWE after frost & sublimation to original SWE
     real(kind=kind_noahmp)           :: SnowWaterTmp                  ! temporary SWE
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowLiqVol   ! partial volume of liquid water in layer
-    real(kind=kind_noahmp), allocatable, dimension(:) :: SnowIceVol   ! partial volume of ice lens in layer
 
 ! --------------------------------------------------------------------
     associate(                                                                       &
@@ -52,20 +49,19 @@ contains
               SnowLiqWater           => noahmp%water%state%SnowLiqWater             ,& ! inout, snow layer liquid water [mm]
               SoilLiqWater           => noahmp%water%state%SoilLiqWater             ,& ! inout, soil liquid moisture [m3/m3]
               SoilIce                => noahmp%water%state%SoilIce                  ,& ! inout, soil ice moisture [m3/m3]
+              SnowIceVol             => noahmp%water%state%SnowIceVol               ,& ! inout, partial volume of snow ice [m3/m3]
+              SnowLiqWaterVol        => noahmp%water%state%SnowLiqWaterVol          ,& ! inout, partial volume of snow liquid water [m3/m3]
               SnowEffPorosity        => noahmp%water%state%SnowEffPorosity          ,& ! out,   snow effective porosity [m3/m3]
-              SnowBotOutflow         => noahmp%water%flux%SnowBotOutflow             & ! out,   total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
+              SnowBotOutflow         => noahmp%water%flux%SnowBotOutflow            ,& ! out,   total water (snowmelt + rain through pack) out of snowpack bottom [mm/s]
+              OutflowSnowLayer       => noahmp%water%flux%OutflowSnowLayer           & ! out,   water flow out of each snow layer [mm/s]
              )
 ! ----------------------------------------------------------------------
 
     ! initialization
-    if (.not. allocated(SnowLiqVol)) allocate(SnowLiqVol(-NumSnowLayerMax+1:0))
-    if (.not. allocated(SnowIceVol)) allocate(SnowIceVol(-NumSnowLayerMax+1:0))
-    SnowLiqVol(:)      = 0.0
-    SnowIceVol(:)      = 0.0
     SnowEffPorosity(:) = 0.0
     SnowBotOutflow     = 0.0
     InflowSnowLayer    = 0.0
-    OutflowSnowLayer   = 0.0
+    OutflowSnowLayer(:)= 0.0
 
     ! for the case when SnowWaterEquiv becomes '0' after 'COMBINE'
     if ( SnowWaterEquiv == 0.0 ) then
@@ -104,9 +100,14 @@ contains
 
     ! for multi-layer (>=1) snow
     if ( NumSnowLayerNeg < 0 ) then
+      SnowWaterTmp = SnowIce(NumSnowLayerNeg+1) + SnowLiqWater(NumSnowLayerNeg+1) ! top layer total snow water before sublimation
       SnowIceTmp = SnowIce(NumSnowLayerNeg+1) - SublimSnowSfcIce*MainTimeStep + FrostSnowSfcIce*MainTimeStep
       SnowIce(NumSnowLayerNeg+1) = SnowIceTmp
       if ( (SnowIceTmp < 1.0e-6) .and. (NumSnowLayerNeg < 0) ) call SnowLayerCombine(noahmp)
+      if ( (SnowIceTmp >= 1.0e-6) .and. (NumSnowLayerNeg < 0) ) then ! re-adjust snow layer thickness
+         ThicknessSnowSoilLayer(NumSnowLayerNeg+1) = ThicknessSnowSoilLayer(NumSnowLayerNeg+1) * &
+                       (SnowIce(NumSnowLayerNeg+1) + SnowLiqWater(NumSnowLayerNeg+1)) / SnowWaterTmp ! assuming same snow density
+      endif
       if ( NumSnowLayerNeg < 0 ) then
          SnowLiqWater(NumSnowLayerNeg+1) = SnowLiqWater(NumSnowLayerNeg+1) + RainfallGround * MainTimeStep
          SnowLiqWater(NumSnowLayerNeg+1) = max(0.0, SnowLiqWater(NumSnowLayerNeg+1))
@@ -121,22 +122,23 @@ contains
 
     ! compute inter-layer snow water flow
     do LoopInd = NumSnowLayerNeg+1, 0
-       SnowLiqWater(LoopInd) = SnowLiqWater(LoopInd) + InflowSnowLayer
-       SnowLiqVol(LoopInd)   = SnowLiqWater(LoopInd) / (ThicknessSnowSoilLayer(LoopInd)*ConstDensityWater)
-       OutflowSnowLayer      = max(0.0, (SnowLiqVol(LoopInd)-SnowLiqHoldCap*SnowEffPorosity(LoopInd)) * &
-                                        ThicknessSnowSoilLayer(LoopInd))
+       SnowLiqWater(LoopInd)     = SnowLiqWater(LoopInd) + InflowSnowLayer
+       SnowLiqWaterVol(LoopInd)  = SnowLiqWater(LoopInd) / (ThicknessSnowSoilLayer(LoopInd)*ConstDensityWater)
+       OutflowSnowLayer(LoopInd) = max(0.0, (SnowLiqWaterVol(LoopInd)-SnowLiqHoldCap*SnowEffPorosity(LoopInd)) * &
+                                       ThicknessSnowSoilLayer(LoopInd))
        if ( LoopInd == 0 ) then
-          OutflowSnowLayer   = max((SnowLiqVol(LoopInd)-SnowEffPorosity(LoopInd)) * ThicknessSnowSoilLayer(LoopInd), &
-                                 SnowLiqReleaseFac * MainTimeStep * OutflowSnowLayer)
+          OutflowSnowLayer(LoopInd) = max((SnowLiqWaterVol(LoopInd)-SnowEffPorosity(LoopInd)) * ThicknessSnowSoilLayer(LoopInd), &
+                                          SnowLiqReleaseFac * MainTimeStep * OutflowSnowLayer(LoopInd))
        endif
-       OutflowSnowLayer      = OutflowSnowLayer * ConstDensityWater
-       SnowLiqWater(LoopInd) = SnowLiqWater(LoopInd) - OutflowSnowLayer
+       OutflowSnowLayer(LoopInd)    = OutflowSnowLayer(LoopInd) * ConstDensityWater
+       SnowLiqWater(LoopInd) = SnowLiqWater(LoopInd) - OutflowSnowLayer(LoopInd)
        if ( (SnowLiqWater(LoopInd)/(SnowIce(LoopInd)+SnowLiqWater(LoopInd))) > SnowLiqFracMax ) then
-          OutflowSnowLayer   = OutflowSnowLayer + (SnowLiqWater(LoopInd) - &
-                                                   SnowLiqFracMax / (1.0-SnowLiqFracMax) * SnowIce(LoopInd))
+          OutflowSnowLayer(LoopInd) = OutflowSnowLayer(LoopInd) + (SnowLiqWater(LoopInd) - &
+                                      SnowLiqFracMax / (1.0-SnowLiqFracMax) * SnowIce(LoopInd))
           SnowLiqWater(LoopInd) = SnowLiqFracMax / (1.0 - SnowLiqFracMax) * SnowIce(LoopInd)
        endif
-       InflowSnowLayer = OutflowSnowLayer
+       InflowSnowLayer = OutflowSnowLayer(LoopInd)
+       SnowLiqWaterVol(LoopInd)  = SnowLiqWater(LoopInd) / (ThicknessSnowSoilLayer(LoopInd)*ConstDensityWater) ! update SnowLiqWaterVol
     enddo
 
     ! update snow depth
@@ -146,11 +148,8 @@ contains
     enddo
 
     ! Liquid water from snow bottom to soil [mm/s]
-    SnowBotOutflow = OutflowSnowLayer / MainTimeStep
-
-    ! deallocate local arrays to avoid memory leaks
-    deallocate(SnowLiqVol)
-    deallocate(SnowIceVol)
+    SnowBotOutflow      = OutflowSnowLayer(0) / MainTimeStep
+    OutflowSnowLayer(:) = OutflowSnowLayer(:) / MainTimeStep
 
     end associate
 

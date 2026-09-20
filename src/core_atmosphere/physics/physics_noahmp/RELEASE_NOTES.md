@@ -1,6 +1,132 @@
 # Noah-MP model release notes
 
-## Noah-MP version 5.0 release
+## Noah-MP version 5.2.1 release
+
+### LSM capabilities/enhancements
+
+- none
+
+
+### Driver capabilities/enhancements
+
+- None
+
+
+### LSM bug fixes
+
+- fix for urban physics variables allocation and default urban vertical resolution for BEP (https://github.com/NCAR/noahmp/pull/243)
+- bug fix for canopy interception and canopy evaporation (https://github.com/NCAR/noahmp/pull/238)
+- DOE/ERF driver interface updates (https://github.com/NCAR/noahmp/pull/244)
+
+### Driver bug fixes
+
+- None
+
+
+### External modules capabilities/enhancements
+
+- None
+
+
+## Noah-MP version 5.2.0 release
+
+### LSM capabilities/enhancements
+
+- none
+
+
+### Driver capabilities/enhancements
+
+- New driver interface for coupling with WRF
+- New urban driver interface for SLUCM urban tree schemes in WRF
+
+
+### LSM bug fixes
+
+- None
+
+### Driver bug fixes
+
+- None
+
+
+### External modules capabilities/enhancements
+
+- None
+
+
+## Noah-MP version 5.1.1 release
+
+### LSM capabilities/enhancements
+
+- none
+
+
+### Driver capabilities/enhancements
+
+- improved driver interface with DOE's ERF model for Multi-Level AMR, Radiation, and Misc. (https://github.com/NCAR/noahmp/pull/201)
+
+
+### LSM bug fixes
+
+- bug fixes and code formatting improvement related to CBIOM, soil depth, snow liquid water, urban, and crop (https://github.com/NCAR/noahmp/pull/219)
+- bug fix for reference height diagnosis (https://github.com/NCAR/noahmp/pull/207)
+
+### Driver bug fixes
+
+- None
+
+
+### External modules capabilities/enhancements
+
+- None
+
+
+## Noah-MP version 5.1.0 release
+
+### LSM capabilities/enhancements
+
+- add new snow compaction scheme (with namelist option control) developed by Abolafia-Rosenzweig et al 2024 (JAMES; https://doi.org/10.1029/2023MS003869) (https://github.com/NCAR/noahmp/pull/174)
+- improved spring wheat parameters developed by Zhang et al 2023 (GMD; https://doi.org/10.5194/gmd-16-3809-2023) (https://github.com/NCAR/noahmp/pull/175)
+- add new wetland scheme (with namelist option control) developed by Zhang et al 2022 (WRR; https://doi.org/10.1029/2021WR030573) (https://github.com/NCAR/noahmp/pull/186)
+- couple SNICAR v3 snow albedo scheme into Noah-MP (with namelist option control) developed by Lin et al 2024 (JHM; https://doi.org/10.1175/JHM-D-24-0082.1) (https://github.com/NCAR/noahmp/pull/187)
+- parallelization capability for MMF groundwater scheme (https://github.com/NCAR/noahmp/pull/139)
+- add new snow cover scheme (with namelist option control) developed by Abolafia-Rosenzweig et al 2025 (JAMES; doi:10.1029/2024MS004704) (https://github.com/NCAR/noahmp/pull/191)
+
+
+### Driver capabilities/enhancements
+
+- coupling Noah-MP v5.0 with NASA Land Information System (LIS) through GitHub submodule with new LIS/NoahMP driver interface (https://github.com/NCAR/noahmp/pull/170)
+- coupling Noah-MP v5.1.0 with DOE's Energy Research and Forecasting (ERF) model through GitHub submodule with new ERF/NoahMP driver interface (https://github.com/NCAR/noahmp/pull/178)
+
+
+### LSM bug fixes
+
+- bug fix for FVEG scaling of canopy heat storage (https://github.com/NCAR/noahmp/pull/88)
+- bug fix for initialization to work with BEP,BEM urban physics (https://github.com/NCAR/noahmp/pull/94)
+- use consistent common undefined value for initialization (https://github.com/NCAR/noahmp/pull/101)
+- fix negative theta in pedotransfer function (https://github.com/NCAR/noahmp/pull/111)
+- bug fix for OptRainSnowPartition == 5 update for warm instances (https://github.com/NCAR/noahmp/pull/112)
+- bug fix for snow to avoid numerical floating error (https://github.com/NCAR/noahmp/pull/122)
+- bug fix for LECH SURFACE FUNCTIONS in Chen97 (https://github.com/NCAR/noahmp/pull/123)
+- bug fix for domain size input variable (https://github.com/NCAR/noahmp/pull/127)
+- bug fixes related to snow and soil (https://github.com/NCAR/noahmp/pull/173)
+- bug fix to make SNOWH initialization consistent for land glacier and other snowpack (https://github.com/NCAR/noahmp/pull/189)
+- Bug fix to avoid zero or negative gridsize (https://github.com/NCAR/noahmp/pull/192)
+
+
+### Driver bug fixes
+
+- None
+
+
+### External modules capabilities/enhancements
+
+- None
+
+
+
+## Noah-MP version 5.0.0 release
 
 ### LSM capabilities/enhancements
 
@@ -423,4 +549,4 @@
 
 
 
-Updated: March 10, 2023
+Updated: May 23, 2025

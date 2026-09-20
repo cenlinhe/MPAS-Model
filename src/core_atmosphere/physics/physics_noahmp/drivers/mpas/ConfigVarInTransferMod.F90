@@ -7,10 +7,11 @@ module ConfigVarInTransferMod
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (He et al. 2023)
+! Sep 13, 2026: NoahmpIO%xx change to 1-D vector for MPAS, Cenlin He (NCAR)
 ! -------------------------------------------------------------------------
 
   use Machine
-  use NoahmpIOVarType
+  use NoahmpIOVarType, only : NoahmpIO_type
   use NoahmpVarType
 
   implicit none
@@ -58,10 +59,27 @@ contains
     noahmp%config%nmlist%OptRunoffSurface            = NoahmpIO%IOPT_RUNSRF
     noahmp%config%nmlist%OptRunoffSubsurface         = NoahmpIO%IOPT_RUNSUB
     noahmp%config%nmlist%OptGlacierTreatment         = NoahmpIO%IOPT_GLA
+    noahmp%config%nmlist%OptSnowCompaction           = NoahmpIO%IOPT_COMPACT
+    noahmp%config%nmlist%OptWetlandModel             = NoahmpIO%IOPT_WETLAND
+    noahmp%config%nmlist%OptSnowCoverGround          = NoahmpIO%IOPT_SCF
+
+    if ( noahmp%config%nmlist%OptSnowAlbedo == 3 ) then ! SNICAR namelist
+       noahmp%config%nmlist%OptSnicarSnowShape          = NoahmpIO%SNICAR_SNOWSHAPE_OPT
+       noahmp%config%nmlist%OptSnicarRTSolver           = NoahmpIO%SNICAR_RTSOLVER_OPT
+       noahmp%config%nmlist%OptSnicarBandNum            = NoahmpIO%SNICAR_BANDNUMBER_OPT 
+       noahmp%config%nmlist%OptSnicarSolarSpec          = NoahmpIO%SNICAR_SOLARSPEC_OPT
+       noahmp%config%nmlist%OptSnicarSnwOptic           = NoahmpIO%SNICAR_SNOWOPTICS_OPT
+       noahmp%config%nmlist%OptSnicarDustOptic          = NoahmpIO%SNICAR_DUSTOPTICS_OPT
+       noahmp%config%nmlist%FlagSnicarSnowBCIntmix      = NoahmpIO%SNICAR_SNOWBC_INTMIX
+       noahmp%config%nmlist%FlagSnicarSnowDustIntmix    = NoahmpIO%SNICAR_SNOWDUST_INTMIX
+       noahmp%config%nmlist%FlagSnicarUseAerosol        = NoahmpIO%SNICAR_USE_AEROSOL
+       noahmp%config%nmlist%FlagSnicarUseOC             = NoahmpIO%SNICAR_USE_OC
+       noahmp%config%nmlist%FlagSnicarAerosolReadTable  = NoahmpIO%SNICAR_AEROSOL_READTABLE
+    endif
 
     ! config domain variable
     noahmp%config%domain%SurfaceType                 = 1
-    noahmp%config%domain%NumSwRadBand                = 2
+    noahmp%config%domain%NumSwRadBand                = NoahmpIO%NUMRAD
     noahmp%config%domain%SoilColor                   = 4
     noahmp%config%domain%NumCropGrowStage            = 8
     noahmp%config%domain%FlagSoilProcess             = NoahmpIO%calculate_soil
@@ -73,7 +91,7 @@ contains
     noahmp%config%domain%GridIndexJ                  = NoahmpIO%J
     noahmp%config%domain%MainTimeStep                = NoahmpIO%DTBL
     noahmp%config%domain%SoilTimeStep                = NoahmpIO%DTBL * NoahmpIO%soil_update_steps
-    noahmp%config%domain%GridSize                    = NoahmpIO%DX
+    noahmp%config%domain%GridSize                    = sqrt(max(10.0,NoahmpIO%DX(I)) * max(10.0,NoahmpIO%DY(I)))
     noahmp%config%domain%LandUseDataName             = NoahmpIO%LLANDUSE
     noahmp%config%domain%VegType                     = NoahmpIO%IVGTYP(I)
     noahmp%config%domain%CropType                    = NoahmpIO%CROPCAT(I)
@@ -91,6 +109,14 @@ contains
     noahmp%config%domain%IndexEBLForest              = NoahmpIO%EBLFOREST_TABLE
     noahmp%config%domain%RunoffSlopeType             = NoahmpIO%SLOPETYP
     noahmp%config%domain%DepthSoilTempBottom         = NoahmpIO%ZBOT_TABLE
+
+    if ( noahmp%config%nmlist%OptSnowAlbedo == 3 ) then ! SNICAR variables
+       noahmp%config%domain%NumTempSnwAgeSnicar      = NoahmpIO%idx_T_max
+       noahmp%config%domain%NumTempGradSnwAgeSnicar  = NoahmpIO%idx_Tgrd_max
+       noahmp%config%domain%NumDensitySnwAgeSnicar   = NoahmpIO%idx_rhos_max
+       noahmp%config%domain%NumSnicarRadBand         = NoahmpIO%snicar_numrad_snw
+       noahmp%config%domain%NumRadiusSnwMieSnicar    = NoahmpIO%idx_Mie_snw_mx
+    endif
 
     ! the following initialization cannot be done in ConfigVarInitMod
     ! because the NumSoilLayer and NumSnowLayerMax are initialized with input values in this module
@@ -128,13 +154,14 @@ contains
 
     ! treatment for urban point
     if ( (NoahmpIO%IVGTYP(I) == NoahmpIO%ISURBAN_TABLE) .or. (NoahmpIO%IVGTYP(I) > NoahmpIO%URBTYPE_beg) ) then
-       noahmp%config%domain%FlagUrban = .true. 
-       if(NoahmpIO%SF_URBAN_PHYSICS == 0 ) then
-           noahmp%config%domain%VegType = NoahmpIO%ISURBAN_TABLE
+       if ( NoahmpIO%SF_URBAN_PHYSICS == 0 ) then
+           noahmp%config%domain%VegType = NoahmpIO%ISURBAN_TABLE  ! treat as bulk urban point
+           noahmp%config%domain%FlagUrban = .true.
        else
-           noahmp%config%domain%VegType = NoahmpIO%NATURAL_TABLE  ! set urban vegetation type based on table natural
-           NoahmpIO%GVFMAX(I)         = 0.96 * 100.0            ! unit: %
-       endif         
+           noahmp%config%domain%VegType = NoahmpIO%NATURAL_TABLE  ! set rural vegetation type based on table natural
+                                                                  ! urban is handled by explicit urban scheme outside Noah-MP
+           NoahmpIO%GVFMAX(I)           = 0.96 * 100.0            ! unit: %
+       endif
     endif
 
     ! treatment for crop point
@@ -145,8 +172,8 @@ contains
     if ( (NoahmpIO%IOPT_CROP > 0) .and. (NoahmpIO%CROPCAT(I) > 0) ) then
        noahmp%config%domain%CropType = NoahmpIO%CROPCAT(I)
        noahmp%config%domain%VegType  = NoahmpIO%ISCROP_TABLE
-       NoahmpIO%VEGFRA(I)          = 0.95 * 100.0              ! unit: %
-       NoahmpIO%GVFMAX(I)          = 0.95 * 100.0              ! unit: %
+       NoahmpIO%VEGFRA(I)            = 0.95 * 100.0              ! unit: %
+       NoahmpIO%GVFMAX(I)            = 0.95 * 100.0              ! unit: %
     endif
 
     ! correct inconsistent soil type

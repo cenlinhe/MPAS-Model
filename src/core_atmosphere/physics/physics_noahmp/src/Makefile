@@ -1,150 +1,181 @@
-.SUFFIXES: .F90 .o
+# Makefile 
+
+.SUFFIXES:
+.SUFFIXES: .o .F90
+
+# Detect MPAS build from CPPFLAGS
+ifneq (,$(findstring -DNOAHMP_MPAS,$(CPPFLAGS)))
+NOAHMP_MPAS_BUILD = yes
+endif
+
+# Only HRLDAS/community compilation needs this file.
+# It is not needed for "make clean".
+ifneq ($(MAKECMDGOALS),clean)
+ifndef NOAHMP_MPAS_BUILD
+include ../../hrldas/user_build_options
+endif
+endif
+
+
+OBJS = ConstantDefineMod.o \
+       ConfigVarType.o \
+       ForcingVarType.o \
+       EnergyVarType.o \
+       WaterVarType.o \
+       BiochemVarType.o \
+       NoahmpVarType.o \
+       ConfigVarInitMod.o \
+       ForcingVarInitMod.o \
+       EnergyVarInitMod.o \
+       WaterVarInitMod.o \
+       BiochemVarInitMod.o \
+       CanopyHydrologyMod.o \
+       GroundWaterTopModelMod.o \
+       IrrigationFloodMod.o \
+       IrrigationInfilPhilipMod.o \
+       IrrigationMicroMod.o \
+       MatrixSolverTriDiagonalMod.o \
+       RunoffSubSurfaceDrainageMod.o \
+       RunoffSubSurfaceEquiWaterTableMod.o \
+       RunoffSubSurfaceGroundWaterMod.o \
+       RunoffSubSurfaceShallowMmfMod.o \
+       RunoffSurfaceBatsMod.o \
+       RunoffSurfaceDynamicVicMod.o \
+       RunoffSurfaceExcessDynamicVicMod.o \
+       RunoffSurfaceFreeDrainMod.o \
+       RunoffSurfaceTopModelEquiMod.o \
+       RunoffSurfaceTopModelGrdMod.o \
+       RunoffSurfaceTopModelMmfMod.o \
+       RunoffSurfaceVicMod.o \
+       RunoffSurfaceXinAnJiangMod.o \
+       RunoffSurfaceWetlandMod.o \
+       WetlandWaterZhang22Mod.o \
+       ShallowWaterTableMmfMod.o \
+       SnowfallBelowCanopyMod.o \
+       SnowLayerCombineMod.o \
+       SnowLayerDivideMod.o \
+       SnowLayerWaterComboMod.o \
+       SnowpackCompactionMod.o \
+       SnowpackCompactionAR24Mod.o \
+       SnowpackHydrologyMod.o \
+       SnowWaterMainMod.o \
+       SoilHydraulicPropertyMod.o \
+       SoilMoistureSolverMod.o \
+       SoilWaterDiffusionRichardsMod.o \
+       SoilWaterInfilGreenAmptMod.o \
+       SoilWaterInfilPhilipMod.o \
+       SoilWaterInfilSmithParlangeMod.o \
+       SoilWaterMainMod.o \
+       TileDrainageEquiDepthMod.o \
+       TileDrainageHooghoudtMod.o \
+       TileDrainageSimpleMod.o \
+       WaterMainMod.o \
+       WaterTableDepthSearchMod.o \
+       WaterTableEquilibriumMod.o \
+       IrrigationTriggerMod.o \
+       IrrigationSprinklerMod.o \
+       CanopyWaterInterceptMod.o \
+       PrecipitationHeatAdvectMod.o \
+       SnowThermalPropertyMod.o \
+       SoilThermalPropertyMod.o \
+       GroundThermalPropertyMod.o \
+       EnergyMainMod.o \
+       NoahmpMainMod.o \
+       SnowAerosolSnicarMod.o \
+       SnowAgingBatsMod.o \
+       SnowAgingSnicarMod.o \
+       SnowAlbedoBatsMod.o \
+       SnowAlbedoClassMod.o \
+       SnowAlbedoSnicarMod.o \
+       SnowFreshRadiusMod.o \
+       SnowInputSnicarMod.o \
+       SnowRadiationSnicarMod.o \
+       GroundAlbedoMod.o \
+       CanopyRadiationTwoStreamMod.o \
+       SurfaceAlbedoMod.o \
+       SurfaceRadiationMod.o \
+       HumiditySaturationMod.o \
+       ResistanceAboveCanopyChen97Mod.o \
+       ResistanceAboveCanopyMostMod.o \
+       ResistanceCanopyStomataBallBerryMod.o \
+       ResistanceCanopyStomataJarvisMod.o \
+       ResistanceLeafToGroundMod.o \
+       VaporPressureSaturationMod.o \
+       SurfaceEnergyFluxVegetatedMod.o \
+       ResistanceBareGroundChen97Mod.o \
+       ResistanceBareGroundMostMod.o \
+       SurfaceEnergyFluxBareGroundMod.o \
+       SoilSnowTemperatureMainMod.o \
+       SoilSnowTemperatureSolverMod.o \
+       SoilSnowThermalDiffusionMod.o \
+       SoilSnowWaterPhaseChangeMod.o \
+       SoilWaterSupercoolKoren99Mod.o \
+       SoilWaterSupercoolNiu06Mod.o \
+       SnowCoverGroundNiu07Mod.o \
+       SnowCoverGroundAR25Mod.o \
+       GroundRoughnessPropertyMod.o \
+       SurfaceEmissivityMod.o \
+       PsychrometricVariableMod.o \
+       ResistanceGroundEvaporationMod.o \
+       SoilWaterTranspirationMod.o \
+       AtmosForcingMod.o \
+       PhenologyMainMod.o \
+       BiochemCropMainMod.o \
+       BiochemNatureVegMainMod.o \
+       CarbonFluxCropMod.o \
+       CarbonFluxNatureVegMod.o \
+       CropGrowDegreeDayMod.o \
+       CropPhotosynthesisMod.o \
+       IrrigationPrepareMod.o \
+       BalanceErrorCheckMod.o \
+       GeneralInitMod.o \
+       BalanceErrorCheckGlacierMod.o \
+       EnergyMainGlacierMod.o \
+       GeneralInitGlacierMod.o \
+       GlacierIceThermalPropertyMod.o \
+       GlacierPhaseChangeMod.o \
+       GlacierTemperatureMainMod.o \
+       GlacierTemperatureSolverMod.o \
+       GlacierThermalDiffusionMod.o \
+       GroundAlbedoGlacierMod.o \
+       GroundRoughnessPropertyGlacierMod.o \
+       GroundThermalPropertyGlacierMod.o \
+       NoahmpMainGlacierMod.o \
+       PrecipitationHeatAdvectGlacierMod.o \
+       PsychrometricVariableGlacierMod.o \
+       ResistanceGroundEvaporationGlacierMod.o \
+       SnowCoverGlacierMod.o \
+       SnowWaterMainGlacierMod.o \
+       SnowpackHydrologyGlacierMod.o \
+       SurfaceAlbedoGlacierMod.o \
+       SurfaceEmissivityGlacierMod.o \
+       SurfaceEnergyFluxGlacierMod.o \
+       SurfaceRadiationGlacierMod.o \
+       WaterMainGlacierMod.o
+
+
+ifdef NOAHMP_MPAS_BUILD
 
 .PHONY: src src_lib
-
-#
 # The Noah-MP code fails to build with the GNU compilers with -std=f2008,
 # so remove that flag here if it is present in FFLAGS
-#
 FFLAGS_NONSTD = $(shell printf "%s" "$(FFLAGS)" | sed -e 's/-std=f2008//g' )
-
 all: dummy src
-
 dummy:
-	echo "****** compiling physics_noahmp/utility ******"
-
-OBJS =  ConstantDefineMod.o \
-	ConfigVarType.o \
-	ForcingVarType.o \
-	EnergyVarType.o \
-	WaterVarType.o \
-	BiochemVarType.o \
-	NoahmpVarType.o \
-	ConfigVarInitMod.o \
-	ForcingVarInitMod.o \
-	EnergyVarInitMod.o \
-	WaterVarInitMod.o \
-	BiochemVarInitMod.o \
-	CanopyHydrologyMod.o \
-	GroundWaterTopModelMod.o \
-	IrrigationFloodMod.o \
-	IrrigationInfilPhilipMod.o \
-	IrrigationMicroMod.o \
-	MatrixSolverTriDiagonalMod.o \
-	RunoffSubSurfaceDrainageMod.o \
-	RunoffSubSurfaceEquiWaterTableMod.o \
-	RunoffSubSurfaceGroundWaterMod.o \
-	RunoffSubSurfaceShallowMmfMod.o \
-	RunoffSurfaceBatsMod.o \
-	RunoffSurfaceDynamicVicMod.o \
-	RunoffSurfaceExcessDynamicVicMod.o \
-	RunoffSurfaceFreeDrainMod.o \
-	RunoffSurfaceTopModelEquiMod.o \
-	RunoffSurfaceTopModelGrdMod.o \
-	RunoffSurfaceTopModelMmfMod.o \
-	RunoffSurfaceVicMod.o \
-	RunoffSurfaceXinAnJiangMod.o \
-	ShallowWaterTableMmfMod.o \
-	SnowfallBelowCanopyMod.o \
-	SnowLayerCombineMod.o \
-	SnowLayerDivideMod.o \
-	SnowLayerWaterComboMod.o \
-	SnowpackCompactionMod.o \
-	SnowpackHydrologyMod.o \
-	SnowWaterMainMod.o \
-	SoilHydraulicPropertyMod.o \
-	SoilMoistureSolverMod.o \
-	SoilWaterDiffusionRichardsMod.o \
-	SoilWaterInfilGreenAmptMod.o \
-	SoilWaterInfilPhilipMod.o \
-	SoilWaterInfilSmithParlangeMod.o \
-	SoilWaterMainMod.o \
-	TileDrainageEquiDepthMod.o \
-	TileDrainageHooghoudtMod.o \
-	TileDrainageSimpleMod.o \
-	WaterMainMod.o \
-	WaterTableDepthSearchMod.o \
-	WaterTableEquilibriumMod.o \
-	IrrigationTriggerMod.o \
-	IrrigationSprinklerMod.o \
-	CanopyWaterInterceptMod.o \
-	PrecipitationHeatAdvectMod.o \
-	SnowThermalPropertyMod.o \
-	SoilThermalPropertyMod.o \
-	GroundThermalPropertyMod.o \
-	EnergyMainMod.o \
-	NoahmpMainMod.o \
-	SnowAgingBatsMod.o \
-	SnowAlbedoBatsMod.o \
-	SnowAlbedoClassMod.o \
-	GroundAlbedoMod.o \
-	CanopyRadiationTwoStreamMod.o \
-	SurfaceAlbedoMod.o \
-	SurfaceRadiationMod.o \
-	HumiditySaturationMod.o \
-	ResistanceAboveCanopyChen97Mod.o \
-	ResistanceAboveCanopyMostMod.o \
-	ResistanceCanopyStomataBallBerryMod.o \
-	ResistanceCanopyStomataJarvisMod.o \
-	ResistanceLeafToGroundMod.o \
-	VaporPressureSaturationMod.o \
-	SurfaceEnergyFluxVegetatedMod.o \
-	ResistanceBareGroundChen97Mod.o \
-	ResistanceBareGroundMostMod.o \
-	SurfaceEnergyFluxBareGroundMod.o \
-	SoilSnowTemperatureMainMod.o \
-	SoilSnowTemperatureSolverMod.o \
-	SoilSnowThermalDiffusionMod.o \
-	SoilSnowWaterPhaseChangeMod.o \
-	SoilWaterSupercoolKoren99Mod.o \
-	SoilWaterSupercoolNiu06Mod.o \
-	SnowCoverGroundNiu07Mod.o \
-	GroundRoughnessPropertyMod.o \
-	SurfaceEmissivityMod.o \
-	PsychrometricVariableMod.o \
-	ResistanceGroundEvaporationMod.o \
-	SoilWaterTranspirationMod.o \
-	AtmosForcingMod.o \
-	PhenologyMainMod.o \
-	BiochemCropMainMod.o \
-	BiochemNatureVegMainMod.o \
-	CarbonFluxCropMod.o \
-	CarbonFluxNatureVegMod.o \
-	CropGrowDegreeDayMod.o \
-	CropPhotosynthesisMod.o \
-	IrrigationPrepareMod.o \
-	BalanceErrorCheckMod.o \
-	GeneralInitMod.o \
-	BalanceErrorCheckGlacierMod.o \
-	EnergyMainGlacierMod.o \
-	GeneralInitGlacierMod.o \
-	GlacierIceThermalPropertyMod.o \
-	GlacierPhaseChangeMod.o \
-	GlacierTemperatureMainMod.o \
-	GlacierTemperatureSolverMod.o \
-	GlacierThermalDiffusionMod.o \
-	GroundAlbedoGlacierMod.o \
-	GroundRoughnessPropertyGlacierMod.o \
-	GroundThermalPropertyGlacierMod.o \
-	NoahmpMainGlacierMod.o \
-	PrecipitationHeatAdvectGlacierMod.o \
-	PsychrometricVariableGlacierMod.o \
-	ResistanceGroundEvaporationGlacierMod.o \
-	SnowCoverGlacierMod.o \
-	SnowWaterMainGlacierMod.o \
-	SnowpackHydrologyGlacierMod.o \
-	SurfaceAlbedoGlacierMod.o \
-	SurfaceEmissivityGlacierMod.o \
-	SurfaceEnergyFluxGlacierMod.o \
-	SurfaceRadiationGlacierMod.o \
-	WaterMainGlacierMod.o
-
+	@echo "****** compiling physics_noahmp/src ******"
 src: $(OBJS)
-
 src_lib:
 	ar -ru ./../../libphys.a $(OBJS)
+else
 
-# DEPENDENCIES:
+all: $(OBJS)
+
+endif
+
+
+#
+# Dependencies:
+#
 
 ConstantDefineMod.o:                  ../utility/Machine.o
 ConfigVarType.o:                      ../utility/Machine.o
@@ -187,6 +218,8 @@ RunoffSurfaceTopModelGrdMod.o:        ../utility/Machine.o NoahmpVarType.o Const
 RunoffSurfaceTopModelMmfMod.o:        ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 RunoffSurfaceVicMod.o:                ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 RunoffSurfaceXinAnJiangMod.o:         ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+RunoffSurfaceWetlandMod.o:            ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+WetlandWaterZhang22Mod.o:             ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ShallowWaterTableMmfMod.o:            ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowfallBelowCanopyMod.o:             ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowLayerCombineMod.o:                ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
@@ -195,11 +228,13 @@ SnowLayerDivideMod.o:                 ../utility/Machine.o NoahmpVarType.o Const
                                       SnowLayerWaterComboMod.o
 SnowLayerWaterComboMod.o:             ../utility/Machine.o ConstantDefineMod.o
 SnowpackCompactionMod.o:              ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowpackCompactionAR24Mod.o:          ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowpackHydrologyMod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       SnowLayerCombineMod.o
 SnowWaterMainMod.o:                   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       SnowfallBelowCanopyMod.o SnowpackCompactionMod.o SnowLayerDivideMod.o \
-                                      SnowLayerCombineMod.o SnowpackHydrologyMod.o
+                                      SnowLayerCombineMod.o SnowpackHydrologyMod.o SnowpackCompactionAR24Mod.o \
+                                      SnowAerosolSnicarMod.o
 SoilHydraulicPropertyMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SoilMoistureSolverMod.o:              ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       MatrixSolverTriDiagonalMod.o
@@ -219,7 +254,8 @@ SoilWaterMainMod.o:                   ../utility/Machine.o NoahmpVarType.o Const
                                       RunoffSubSurfaceEquiWaterTableMod.o RunoffSubSurfaceGroundWaterMod.o \
                                       RunoffSubSurfaceDrainageMod.o RunoffSubSurfaceShallowMmfMod.o \
                                       SoilWaterDiffusionRichardsMod.o SoilMoistureSolverMod.o \
-                                      TileDrainageSimpleMod.o TileDrainageHooghoudtMod.o
+                                      TileDrainageSimpleMod.o TileDrainageHooghoudtMod.o \
+				      RunoffSurfaceWetlandMod.o
 TileDrainageEquiDepthMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 TileDrainageHooghoudtMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       TileDrainageEquiDepthMod.o WaterTableDepthSearchMod.o \
@@ -227,7 +263,7 @@ TileDrainageHooghoudtMod.o:           ../utility/Machine.o NoahmpVarType.o Const
 TileDrainageSimpleMod.o:              ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 WaterMainMod.o:                       ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       CanopyHydrologyMod.o SnowWaterMainMod.o IrrigationFloodMod.o \
-                                      IrrigationMicroMod.o SoilWaterMainMod.o
+                                      IrrigationMicroMod.o SoilWaterMainMod.o WetlandWaterZhang22Mod.o
 WaterTableDepthSearchMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 WaterTableEquilibriumMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 IrrigationTriggerMod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -241,19 +277,27 @@ GroundThermalPropertyMod.o:           ../utility/Machine.o NoahmpVarType.o Const
                                       SnowThermalPropertyMod.o SoilThermalPropertyMod.o
 CanopyRadiationTwoStreamMod.o:        ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GroundAlbedoMod.o:                    ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAerosolSnicarMod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowAgingBatsMod.o:                   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAgingSnicarMod.o:                 ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowAlbedoBatsMod.o:                  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowAlbedoClassMod.o:                 ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowAlbedoSnicarMod.o:                ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
+                                      SnowRadiationSnicarMod.o
+SnowFreshRadiusMod.o:                 ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowRadiationSnicarMod.o:             ../utility/Machine.o ../utility/PiecewiseLinearInterp1dMod.o \
+                                      NoahmpVarType.o ConstantDefineMod.o
 SurfaceAlbedoMod.o:                   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       SnowAgingBatsMod.o SnowAlbedoBatsMod.o SnowAlbedoClassMod.o \
-                                      GroundAlbedoMod.o CanopyRadiationTwoStreamMod.o
+                                      SnowAlbedoSnicarMod.o GroundAlbedoMod.o CanopyRadiationTwoStreamMod.o \
+                                      SnowAgingSnicarMod.o SnowFreshRadiusMod.o
 SurfaceRadiationMod.o:                ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 EnergyMainMod.o:                      ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       GroundThermalPropertyMod.o SurfaceEnergyFluxVegetatedMod.o \
                                       SurfaceEnergyFluxBareGroundMod.o SoilSnowTemperatureMainMod.o \
                                       SoilSnowWaterPhaseChangeMod.o SnowCoverGroundNiu07Mod.o SurfaceEmissivityMod.o \
                                       GroundRoughnessPropertyMod.o PsychrometricVariableMod.o ResistanceGroundEvaporationMod.o \
-                                      SoilWaterTranspirationMod.o SurfaceAlbedoMod.o SurfaceRadiationMod.o
+                                      SoilWaterTranspirationMod.o SurfaceAlbedoMod.o SurfaceRadiationMod.o SnowCoverGroundAR25Mod.o
 NoahmpMainMod.o:                      ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                       IrrigationPrepareMod.o IrrigationSprinklerMod.o CanopyWaterInterceptMod.o \
                                       PrecipitationHeatAdvectMod.o EnergyMainMod.o WaterMainMod.o AtmosForcingMod.o \
@@ -289,6 +333,7 @@ GroundRoughnessPropertyMod.o:            ../utility/Machine.o NoahmpVarType.o Co
 PsychrometricVariableMod.o:              ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 ResistanceGroundEvaporationMod.o:        ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowCoverGroundNiu07Mod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
+SnowCoverGroundAR25Mod.o:                ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SoilWaterTranspirationMod.o:             ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SurfaceEmissivityMod.o:                  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 AtmosForcingMod.o:                       ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
@@ -303,7 +348,6 @@ BiochemCropMainMod.o:                    ../utility/Machine.o NoahmpVarType.o Co
 IrrigationPrepareMod.o:                  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o IrrigationTriggerMod.o
 BalanceErrorCheckMod.o:                  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 GeneralInitMod.o:                        ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
-GroundWaterMmfMod.o:                     ../utility/Machine.o NoahmpVarType.o ../drivers/hrldas/NoahmpIOVarType.o
 BalanceErrorCheckGlacierMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 EnergyMainGlacierMod.o:                  ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowCoverGlacierMod.o \
                                          GroundRoughnessPropertyGlacierMod.o GroundThermalPropertyGlacierMod.o \
@@ -330,22 +374,40 @@ ResistanceGroundEvaporationGlacierMod.o: ../utility/Machine.o NoahmpVarType.o Co
 SnowCoverGlacierMod.o:                   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SnowWaterMainGlacierMod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowfallBelowCanopyMod.o \
                                          SnowpackCompactionMod.o SnowLayerCombineMod.o SnowLayerDivideMod.o \
-                                         SnowpackHydrologyGlacierMod.o 
+                                         SnowpackHydrologyGlacierMod.o SnowpackCompactionAR24Mod.o SnowAerosolSnicarMod.o
 SnowpackHydrologyGlacierMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowLayerCombineMod.o
 SurfaceAlbedoGlacierMod.o:               ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowAgingBatsMod.o \
-                                         SnowAlbedoBatsMod.o SnowAlbedoClassMod.o GroundAlbedoGlacierMod.o
+                                         SnowAlbedoBatsMod.o SnowAlbedoClassMod.o GroundAlbedoGlacierMod.o SnowAlbedoSnicarMod.o \
+                                         SnowAgingSnicarMod.o SnowFreshRadiusMod.o
 SurfaceEmissivityGlacierMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 SurfaceEnergyFluxGlacierMod.o:           ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o \
                                          VaporPressureSaturationMod.o ResistanceBareGroundMostMod.o
 SurfaceRadiationGlacierMod.o:            ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o
 WaterMainGlacierMod.o:                   ../utility/Machine.o NoahmpVarType.o ConstantDefineMod.o SnowWaterMainGlacierMod.o
 
-clean:
-	$(RM) *.f90 *.o *.mod
-	@# Certain systems with intel compilers generate *.i files
-	@# This removes them during the clean process
-	$(RM) *.i
+ifdef NOAHMP_MPAS_BUILD
+SnowInputSnicarMod.o: ../utility/Machine.o ../drivers/mpas/NoahmpIOVarType.o
+else
+SnowInputSnicarMod.o: ../utility/Machine.o ../drivers/hrldas/NoahmpIOVarType.o
+endif
+
+ifdef NOAHMP_MPAS_BUILD
 
 .F90.o:
-	$(FC) $(CPPFLAGS) $(COREDEF) $(FFLAGS_NONSTD) -c $*.F90 $(CPPINCLUDES) $(FCINCLUDES) -I../utility -I../../../../framework
+	$(FC) $(CPPFLAGS) $(COREDEF) $(FFLAGS_NONSTD) -c $*.F90 \
+	$(CPPINCLUDES) $(FCINCLUDES) -I../utility -I../drivers/mpas -I../../../../framework
+
+else
+
+.F90.o:
+	@echo ""
+	$(RM) $(*).f90
+	$(CPP) $(CPPFLAGS) $(*).F90 > $(*).f90
+	$(COMPILERF90) -c -I. -I../utility -I../drivers/hrldas $(F90FLAGS) $(FREESOURCE) $(NETCDFMOD) $(*).f90
+	@echo ""
+
+endif
+
+clean:
+	$(RM) *.o *.mod *.exe *.f90 *.i 
 

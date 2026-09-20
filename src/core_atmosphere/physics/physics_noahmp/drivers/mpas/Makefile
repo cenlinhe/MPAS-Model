@@ -14,7 +14,6 @@ OBJS =  NoahmpSnowInitMod.o \
 	NoahmpIOVarInitMod.o \
 	NoahmpIOVarFinalizeMod.o \
 	NoahmpReadTableMod.o \
-	NoahmpReadNamelistMod.o \
 	ConfigVarOutTransferMod.o \
 	ForcingVarOutTransferMod.o \
 	EnergyVarOutTransferMod.o \
@@ -38,7 +37,6 @@ NoahmpIOVarType.o:          ../../utility/Machine.o
 NoahmpIOVarInitMod.o:       ../../utility/Machine.o NoahmpIOVarType.o
 NoahmpIOVarFinalizeMod.o:   ../../utility/Machine.o NoahmpIOVarType.o
 NoahmpReadTableMod.o:       ../../utility/Machine.o NoahmpIOVarType.o
-NoahmpReadNamelistMod.o:    ../../utility/Machine.o NoahmpIOVarType.o
 PedoTransferSR2006Mod.o:    ../../utility/Machine.o NoahmpIOVarType.o
 ConfigVarOutTransferMod.o:  ../../utility/Machine.o NoahmpIOVarType.o ../../src/NoahmpVarType.o
 ForcingVarOutTransferMod.o: ../../utility/Machine.o NoahmpIOVarType.o ../../src/NoahmpVarType.o
@@ -61,7 +59,8 @@ NoahmpDriverMainMod.o:      ../../utility/Machine.o ../../src/NoahmpVarType.o No
                             WaterVarOutTransferMod.o BiochemVarOutTransferMod.o \
                             ForcingVarOutTransferMod.o ConfigVarInTransferMod.o \
                             ForcingVarInTransferMod.o EnergyVarInTransferMod.o \
-                            WaterVarInTransferMod.o BiochemVarInTransferMod.o
+                            WaterVarInTransferMod.o BiochemVarInTransferMod.o \
+			    ../../../mpas_atmphys_date_time.o
 
 clean:
 	$(RM) *.f90 *.o *.mod
@@ -70,5 +69,5 @@ clean:
 	$(RM) *.i
 
 .F90.o:
-	$(FC) $(CPPFLAGS) $(COREDEF) $(FFLAGS) -c $*.F90 $(CPPINCLUDES) $(FCINCLUDES) -I. -I../../utility -I../../src -I../../../../../framework $(MPAS_ESMF_INC)
+	$(FC) $(CPPFLAGS) $(COREDEF) $(FFLAGS) -c $*.F90 $(CPPINCLUDES) $(FCINCLUDES) -I. -I../../utility -I../../src -I../../../../../framework -I../../../../physics $(MPAS_ESMF_INC)
 

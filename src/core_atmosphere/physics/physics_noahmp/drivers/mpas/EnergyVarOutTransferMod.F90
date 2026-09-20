@@ -5,10 +5,11 @@ module EnergyVarOutTransferMod
 ! ------------------------ Code history -----------------------------------
 ! Original code: Guo-Yue Niu and Noah-MP team (Niu et al. 2011)
 ! Refactered code: C. He, P. Valayamkunnath, & refactor team (He et al. 2023)
+! Sep 13, 2026: NoahmpIO%xx change to 1-D vector for MPAS, Cenlin He (NCAR)
 ! -------------------------------------------------------------------------
 
   use Machine
-  use NoahmpIOVarType
+  use NoahmpIOVarType, only : NoahmpIO_type
   use NoahmpVarType
 
   implicit none
@@ -37,6 +38,7 @@ contains
               NumSoilLayer    => noahmp%config%domain%NumSoilLayer    ,&
               NumSnowLayerMax => noahmp%config%domain%NumSnowLayerMax ,&
               NumSnowLayerNeg => noahmp%config%domain%NumSnowLayerNeg ,&
+              NumSwRadBand    => noahmp%config%domain%NumSwRadBand    ,&
               IndicatorIceSfc => noahmp%config%domain%IndicatorIceSfc  &
              )
 !-----------------------------------------------------------------------
@@ -137,13 +139,18 @@ contains
     NoahmpIO%Q2MVXY  (I) = noahmp%energy%state%SpecHumidity2mVeg /(1.0-noahmp%energy%state%SpecHumidity2mVeg)  ! spec humidity to mixing ratio
     NoahmpIO%Q2MBXY  (I) = noahmp%energy%state%SpecHumidity2mBare/(1.0-noahmp%energy%state%SpecHumidity2mBare)
     NoahmpIO%Q2MXY   (I) = NoahmpIO%Q2MBXY(I) * ( 1 - NoahmpIO%FVEGXY(I) ) + NoahmpIO%Q2MVXY(I) * NoahmpIO%FVEGXY(I)
+    NoahmpIO%ALBEDO  (I) = noahmp%energy%state%AlbedoSfc
     NoahmpIO%IRRSPLH (I) = NoahmpIO%IRRSPLH(I) + &
                              (noahmp%energy%flux%HeatLatentIrriEvap * noahmp%config%domain%MainTimeStep)
     NoahmpIO%TSLB    (I,1:NumSoilLayer)       = noahmp%energy%state%TemperatureSoilSnow(1:NumSoilLayer)
     NoahmpIO%TSNOXY  (I,-NumSnowLayerMax+1:0) = noahmp%energy%state%TemperatureSoilSnow(-NumSnowLayerMax+1:0)
-    if ( noahmp%energy%state%AlbedoSfc > -999 ) then
-       NoahmpIO%ALBEDO(I) = noahmp%energy%state%AlbedoSfc
-    endif
+
+    NoahmpIO%ALBSOILDIRXY(I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSoilDir(1:NumSwRadBand)
+    NoahmpIO%ALBSOILDIFXY(I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSoilDif(1:NumSwRadBand)
+    NoahmpIO%ALBSFCDIRXY (I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSfcDir (1:NumSwRadBand)
+    NoahmpIO%ALBSFCDIFXY (I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSfcDif (1:NumSwRadBand)
+    NoahmpIO%ALBSNOWDIRXY(I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSnowDir(1:NumSwRadBand)
+    NoahmpIO%ALBSNOWDIFXY(I,1:NumSwRadBand) = noahmp%energy%state%AlbedoSnowDif(1:NumSwRadBand)
 
     ! New Calculation of total Canopy/Stomatal Conductance Based on Bonan et al. (2011), Inverse of Canopy Resistance (below)
     LeafAreaIndSunlit      = max(noahmp%energy%state%LeafAreaIndSunlit, 0.0)
@@ -153,13 +160,13 @@ contains
          (LeafAreaIndSunlit == 0.0) .or. (LeafAreaIndShade == 0.0)       .or. &
          (noahmp%energy%state%ResistanceStomataSunlit == undefined_real) .or. &
          (noahmp%energy%state%ResistanceStomataShade == undefined_real) ) then
-       NoahmpIO%RS   (I) = 0.0
+       NoahmpIO%RS(I) = 0.0
     else
-       NoahmpIO%RS   (I) = ((1.0 / (noahmp%energy%state%ResistanceStomataSunlit + ResistanceLeafBoundary) * &
-                              noahmp%energy%state%LeafAreaIndSunlit) + &
-                             ((1.0 / (noahmp%energy%state%ResistanceStomataShade + ResistanceLeafBoundary)) * &
-                              noahmp%energy%state%LeafAreaIndShade))
-       NoahmpIO%RS   (I) = 1.0 / NoahmpIO%RS (I) ! Resistance
+       NoahmpIO%RS(I) = ((1.0 / (noahmp%energy%state%ResistanceStomataSunlit + ResistanceLeafBoundary) * &
+                         noahmp%energy%state%LeafAreaIndSunlit) + &
+                        ((1.0 / (noahmp%energy%state%ResistanceStomataShade + ResistanceLeafBoundary)) * &
+                            noahmp%energy%state%LeafAreaIndShade))
+       NoahmpIO%RS(I) = 1.0 / NoahmpIO%RS(I) ! Resistance
     endif
 
     ! calculation of snow and soil energy storage
@@ -174,12 +181,12 @@ contains
        endif
        if ( LoopInd >= 1 ) then
           NoahmpIO%SOILENERGY(I) = NoahmpIO%SOILENERGY(I) + ThicknessSnowSoilLayer * &
-                                     noahmp%energy%state%HeatCapacSoilSnow(LoopInd) * &
-                                     (noahmp%energy%state%TemperatureSoilSnow(LoopInd) - 273.16) * 0.001
+                                   noahmp%energy%state%HeatCapacSoilSnow(LoopInd) * &
+                                   (noahmp%energy%state%TemperatureSoilSnow(LoopInd) - 273.16) * 0.001
        else
           NoahmpIO%SNOWENERGY(I) = NoahmpIO%SNOWENERGY(I) + ThicknessSnowSoilLayer * &
-                                     noahmp%energy%state%HeatCapacSoilSnow(LoopInd) * &
-                                     (noahmp%energy%state%TemperatureSoilSnow(LoopInd) - 273.16) * 0.001
+                                   noahmp%energy%state%HeatCapacSoilSnow(LoopInd) * &
+                                   (noahmp%energy%state%TemperatureSoilSnow(LoopInd) - 273.16) * 0.001
        endif
     enddo
 
