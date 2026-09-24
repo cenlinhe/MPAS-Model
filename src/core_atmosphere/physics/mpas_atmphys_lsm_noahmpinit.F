@@ -12,7 +12,7 @@
  use mpas_pool_routines
  use mpas_timekeeping,       only : mpas_get_timeInterval, mpas_get_clock_timestep
 
- use mpas_atmphys_constants, only : grav => gravity, t0 => svpt0
+ use mpas_atmphys_constants, only : degrad, grav => gravity, t0 => svpt0
  use mpas_atmphys_utilities, only : physics_error_fatal
  use mpas_atmphys_vars,      only : mpas_noahmp
 
@@ -348,8 +348,8 @@
 
  do i = its,ite
     mpas_noahmp%areaxy(i)  = areaCell(i)
-    mpas_noahmp%xlat(i)    = latCell(i)
-    mpas_noahmp%xlong(i)   = lonCell(i)
+    mpas_noahmp%xlat(i)    = latCell(i)/degrad
+    mpas_noahmp%xlong(i)   = lonCell(i)/degrad
     mpas_noahmp%dx(i)      = sqrt(areaCell(i))
     mpas_noahmp%dy(i)      = sqrt(areaCell(i))
     mpas_noahmp%terrain(i) = terrain(i)
