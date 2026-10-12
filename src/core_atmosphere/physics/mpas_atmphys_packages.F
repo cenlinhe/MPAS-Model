@@ -37,10 +37,12 @@
  character(len=StrKIND),pointer:: config_convection_scheme
  character(len=StrKIND),pointer:: config_pbl_scheme
  character(len=StrKIND),pointer:: config_lsm_scheme
+ integer,pointer:: config_urban_physics
  logical,pointer:: mp_kessler_in,mp_thompson_in,mp_thompson_aers_in,mp_wsm6_in
  logical,pointer:: cu_grell_freitas_in,cu_kain_fritsch_in,cu_ntiedtke_in
  logical,pointer:: bl_mynn_in,bl_ysu_in
  logical,pointer:: sf_noahmp_in
+ logical,pointer:: sf_urban_in,sf_urb_slucm_in
 
  integer :: ierr
 
@@ -194,6 +196,42 @@
  call mpas_log_write('    sf_noahmp_in            = $l', logicArgs=(/sf_noahmp_in/))
  call mpas_log_write('')
 
+!--- initialization of all packages for parameterizations of urban processes:
+
+ call mpas_pool_get_config(configs,'config_urban_physics',config_urban_physics)
+
+ nullify(sf_urban_in)
+ nullify(sf_urb_slucm_in)
+ call mpas_pool_get_package(packages,'sf_urban_inActive',sf_urban_in)
+ call mpas_pool_get_package(packages,'sf_urb_slucm_inActive',sf_urb_slucm_in)
+
+ if(.not.associated(sf_urban_in)) then
+    call mpas_log_write('====================================================================================',messageType=MPAS_LOG_ERR)
+    call mpas_log_write('* Error while setting up packages for urban physics options in atmosphere core.'   ,  messageType=MPAS_LOG_ERR)
+    call mpas_log_write('====================================================================================',messageType=MPAS_LOG_ERR)
+    ierr = 1
+    return
+ endif
+
+ if(.not.associated(sf_urb_slucm_in)) then
+    call mpas_log_write('====================================================================================',messageType=MPAS_LOG_ERR)
+    call mpas_log_write('* Error while setting up packages for single-layer urban scheme in atmosphere core.', messageType=MPAS_LOG_ERR)
+    call mpas_log_write('====================================================================================',messageType=MPAS_LOG_ERR)
+    ierr = 1
+    return
+ endif
+
+ if(config_urban_physics > 0) then
+    sf_urban_in = .true.
+ endif
+
+ if(config_urban_physics == 1) then
+    sf_urb_slucm_in = .true.
+ endif
+
+ call mpas_log_write('    sf_urban_in            = $l', logicArgs=(/sf_urban_in/))
+ call mpas_log_write('    sf_urb_slucm_in        = $l', logicArgs=(/sf_urb_slucm_in/))
+ call mpas_log_write('')
 
  end function atmphys_setup_packages
 

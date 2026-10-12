@@ -81,7 +81,8 @@
 
 !=================================================================================================================
  subroutine physics_init(dminfo,stream_manager,clock,configs,mesh,diag,tend,tend_physics,state,time_lev,diag_physics, &
-                         diag_physics_noahmp,ngw_input,atm_input,sfc_input,output_noahmp)
+                         diag_physics_noahmp,ngw_input,atm_input,sfc_input,output_noahmp, &
+                         diag_physics_urban,diag_physics_slucm,output_urban,output_slucm)
 !=================================================================================================================
 
 use mpas_stream_manager
@@ -106,6 +107,10 @@ use mpas_stream_manager
  type(mpas_pool_type),intent(inout):: atm_input
  type(mpas_pool_type),intent(inout):: sfc_input
  type(mpas_pool_type),intent(inout):: output_noahmp
+ type(mpas_pool_type),intent(inout):: diag_physics_urban
+ type(mpas_pool_type),intent(inout):: diag_physics_slucm
+ type(mpas_pool_type),intent(inout):: output_urban
+ type(mpas_pool_type),intent(inout):: output_slucm
 
 !local pointers:
  logical,pointer:: config_do_restart,    &
@@ -121,6 +126,8 @@ use mpas_stream_manager
                    config_radt_lw_scheme,    &
                    config_radt_sw_scheme
 
+ integer,pointer:: config_urban_physics
+ 
  integer,pointer:: nCellsSolve,nLags
  integer,dimension(:),pointer:: i_rainc,i_rainnc
  integer,dimension(:),pointer:: i_acswdnb,i_acswdnbc,i_acswdnt,i_acswdntc, &
@@ -176,6 +183,7 @@ use mpas_stream_manager
  call mpas_pool_get_config(configs,'config_radt_lw_scheme'   ,config_radt_lw_scheme   )
  call mpas_pool_get_config(configs,'config_radt_sw_scheme'   ,config_radt_sw_scheme   )
  call mpas_pool_get_config(configs,'config_microphysics_top' ,config_microphysics_top )
+ call mpas_pool_get_config(configs,'config_urban_physics'    ,config_urban_physics    )
 
  call mpas_pool_get_dimension(mesh,'nCellsSolve',nCellsSolve)
  call mpas_pool_get_dimension(mesh,'nLags'      ,nLags      )
@@ -421,6 +429,11 @@ use mpas_stream_manager
     elseif(config_lsm_scheme .eq. 'sf_noahmp') then
        call init_lsm_noahmp(configs,mesh,clock,diag_physics,diag_physics_noahmp,output_noahmp,sfc_input)
     endif
+ endif
+
+!initialization of land-surface model:
+ if(config_urban_physics > 0) then
+    call init_sf_urban(dminfo,mesh,configs,diag_physics,sfc_input)
  endif
 
 !initialization of shortwave radiation processes:

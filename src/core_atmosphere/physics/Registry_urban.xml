@@ -1,0 +1,283 @@
+<!-- ========================================================================================================= -->
+<!-- ARRAYS SPECIFIC TO URBAN CANOPY MODEL SCHEME:                                                            -->
+<!-- ========================================================================================================= -->
+
+ <dims>
+
+      <dim name="nRoofLevels" definition="nSoilLevels"
+                description="The number of building roof layers used by single-layer UCM scheme"/>
+
+      <dim name="nWallLevels" definition="nSoilLevels"
+                description="The number of building wall layers used by single-layer UCM scheme"/>
+
+      <dim name="nRoadLevels" definition="nSoilLevels"
+                description="The number of urban road layers used by single-layer UCM scheme"/>
+
+      <dim name="FOUR" definition="4"
+                description="Number 4 (for urban frontal four directions)"/>
+
+
+ </dims>
+
+
+ <var_struct name="sfc_input" time_levs="1">
+
+      <var name="frc_urb2d" type="real" dimensions="nCells" units="unitless"
+                description="urban fraction needed as input in urban canopy model"
+                packages="sf_urban_in"/>
+
+      <var name="utype_urb2d" type="integer" dimensions="nCells" units="unitless"
+                description="urban type needed as input in urban canopy model"
+                packages="sf_urban_in"/>
+      
+      <var name="lp_urb2d" type="real" dimensions="nCells Time" units="m"
+	        description="urban plan area length"
+	        packages="sf_urban_in"/>
+      
+      <var name="lb_urb2d" type="real" dimensions="nCells Time" units="m"
+	        description="urban building length"
+	        packages="sf_urban_in"/>
+      
+      <var name="hgt_urb2d" type="real" dimensions="nCells Time" units="m"
+	        description="urban building height"
+	        packages="sf_urban_in"/>
+      
+      <var name="xlat" type="real" dimensions="nCells Time" units="degree"
+	        description="latitude of each grid as urban input"
+	        packages="sf_urban_in"/>
+
+      <var name="xlong" type="real" dimensions="nCells Time" units="degree"
+	        description="longitude of each grid as urban input"
+	        packages="sf_urban_in"/>
+
+      <var name="hrang" type="real" dimensions="nCells Time" units="degree"
+	        description="solar hour angle of each grid as urban input"
+	        packages="sf_urban_in"/>
+
+      <var name="mh_urb2d" type="real" dimensions="nCells Time" units="m"
+                description="urban mean building height"
+                packages="sf_urb_slucm_in"/>
+
+      <var name="stdh_urb2d" type="real" dimensions="nCells Time" units="m"
+                description="standard deviation of urban building height"
+                packages="sf_urb_slucm_in"/>
+
+      <var name="lf_urb2d" type="real" dimensions="FOUR nCells Time" units="unitless"
+                description="urban frontal area index"
+                packages="sf_urb_slucm_in"/>
+
+      <var name="lf_urb2d_s" type="real" dimensions="nCells Time" units="unitless"
+                description="urban mean frontal area index"
+                packages="sf_urb_slucm_in"/>
+
+      <var name="z0_urb2d" type="real" dimensions="nCells Time" units="m"
+                description="urban roughness length"
+                packages="sf_urb_slucm_in"/>
+
+ </var_struct>
+
+
+ <nml_record name="physics_sf_urban" in_defaults="true">
+
+
+ </nml_record>
+
+
+ <var_struct name="diag_physics_urban" time_levs="1" packages="sf_urban_in">
+
+      <var name="sh_urb2d" type="real" dimensions="nCells Time" units="W m^-2"
+                description="urban sensible heat flux" missing_value="-9999.0"/>
+      
+      <var name="lh_urb2d" type="real" dimensions="nCells Time" units="W m^-2"
+                description="urban latent heat flux" missing_value="-9999.0"/>
+      
+      <var name="g_urb2d" type="real" dimensions="nCells Time" units="W m^-2"
+                description="urban ground heat flux" missing_value="-9999.0"/>
+      
+      <var name="rn_urb2d" type="real" dimensions="nCells Time" units="W m^-2"
+                description="urban net radiation" missing_value="-9999.0"/>
+      
+      <var name="ts_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban surface skin temperature" missing_value="-9999.0"/>
+
+ </var_struct>
+
+
+ <var_struct name="diag_physics_slucm" time_levs="1" packages="sf_urb_slucm_in">
+
+      <var name="cmr_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for momentum in urban roof surface diffusion" missing_value="-9999.0"/>
+
+      <var name="chr_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for heat in urban roof surface diffusion" missing_value="-9999.0"/>
+
+      <var name="cmc_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for momentum in urban canopy surface diffusion" missing_value="-9999.0"/>
+
+      <var name="chc_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for heat in urban canopy surface diffusion" missing_value="-9999.0"/>
+
+      <var name="cmgr_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for momentum in urban ground surface diffusion" missing_value="-9999.0"/>
+
+      <var name="chgr_sfcdif" type="real" dimensions="nCells Time" units="unitless"
+                description="drag coefficient for heat in urban ground surface diffusion" missing_value="-9999.0"/>
+      
+      <var name="tr_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban roof surface temperature" missing_value="-9999.0"/>
+     
+      <var name="tb_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban building wall temperature" missing_value="-9999.0"/>
+     
+      <var name="tg_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban ground surface temperature" missing_value="-9999.0"/>
+     
+      <var name="tc_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban canopy air temperature" missing_value="-9999.0"/>
+     
+      <var name="qc_urb2d" type="real" dimensions="nCells Time" units="kg kg^-1"
+                description="urban canopy specific humidity" missing_value="-9999.0"/>
+     
+      <var name="uc_urb2d" type="real" dimensions="nCells Time" units="m s^-1"
+                description="urban canopy wind speed" missing_value="-9999.0"/>
+      
+      <var name="xxxr_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="Monin-Obkhov length for urban roof" missing_value="-9999.0"/>
+      
+      <var name="xxxb_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="Monin-Obkhov length for urban building" missing_value="-9999.0"/>
+      
+      <var name="xxxg_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="Monin-Obkhov length for urban ground" missing_value="-9999.0"/>
+      
+      <var name="xxxc_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="Monin-Obkhov length for urban canopy" missing_value="-9999.0"/>
+      
+      <var name="trl_urb3d" type="real" dimensions="nRoofLevels nCells Time" units="K"
+                description="urban roof layer temperature" missing_value="-9999.0"/>
+      
+      <var name="tbl_urb3d" type="real" dimensions="nWallLevels nCells Time" units="K"
+                description="urban wall layer temperature" missing_value="-9999.0"/>
+      
+      <var name="tgl_urb3d" type="real" dimensions="nRoadLevels nCells Time" units="K"
+                description="urban ground layer temperature" missing_value="-9999.0"/>
+      
+      <var name="dzr" type="real" dimensions="nRoofLevels Time" units="m"
+                description="urban roof layer thickness" missing_value="-9999.0"/>
+      
+      <var name="dzb" type="real" dimensions="nWallLevels Time" units="m"
+                description="urban building wall layer thickness" missing_value="-9999.0"/>
+      
+      <var name="dzg" type="real" dimensions="nRoadLevels Time" units="m"
+                description="urban ground layer thickness" missing_value="-9999.0"/>
+      
+      <var name="cmcr_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban canopy momentum drag coefficient" missing_value="-9999.0"/>
+      
+      <var name="tgr_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban green roof surface temperature" missing_value="-9999.0"/>
+      
+      <var name="tgrl_urb3d" type="real" dimensions="nRoofLevels nCells Time" units="K"
+                description="urban green roof layer temperature" missing_value="-9999.0"/>
+      
+      <var name="smr_urb3d" type="real" dimensions="nRoofLevels nCells Time" units="m3 m^-3"
+                description="urban roof moisture profile" missing_value="-9999.0"/>
+      
+      <var name="drelr_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban roof drainage efficiency" missing_value="-9999.0"/>
+      
+      <var name="drelb_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban building drainage efficiency" missing_value="-9999.0"/>
+      
+      <var name="drelg_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban ground drainage efficiency" missing_value="-9999.0"/>
+      
+      <var name="flxhumr_urb2d" type="real" dimensions="nCells Time" units="kg m^-2 s^-1"
+                description="urban roof moisture flux" missing_value="-9999.0"/>
+      
+      <var name="flxhumb_urb2d" type="real" dimensions="nCells Time" units="kg m^-2 s^-1"
+                description="urban building moisture flux" missing_value="-9999.0"/>
+      
+      <var name="flxhumg_urb2d" type="real" dimensions="nCells Time" units="kg m^-2 s^-1"
+                description="urban ground moisture flux" missing_value="-9999.0"/>
+
+      <var name="tvg_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban vegetated ground surface temperature" missing_value="-9999.0"/>
+
+      <var name="xxxvg_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="Monin-Obkhov length for urban vegetated ground" missing_value="-9999.0"/>
+
+      <var name="tvgl_urb3d" type="real" dimensions="nRoadLevels nCells Time" units="K"
+                description="urban vegetated ground soil layer temperature" missing_value="-9999.0"/>
+
+      <var name="smg_urb3d" type="real" dimensions="nRoadLevels nCells Time" units="m3 m^-3"
+                description="urban vegetated ground soil layer moisture" missing_value="-9999.0"/>
+
+      <var name="tt_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban tree temperature" missing_value="-9999.0"/>
+
+      <var name="cmcg_urb2d" type="real" dimensions="nCells Time" units="m"
+                description="Canopy intercepted water on urban ground vegetation" missing_value="-9999.0"/>
+
+      <var name="flxhumvg_urb2d" type="real" dimensions="nCells Time" units="kg m^-2 s^-1"
+                description="urban vegetated ground moisture flux" missing_value="-9999.0"/>
+
+      <var name="flxhumt_urb2d" type="real" dimensions="nCells Time" units="kg m^-2 s^-1"
+                description="urban tree moisture flux" missing_value="-9999.0"/>
+
+ </var_struct>
+
+
+ <var_struct name="output_urban" time_levs="1" packages="sf_urban_in">
+
+      <var name="dz8w" type="real" dimensions="nVertLevels nCells Time" units="m"
+                description="thickness of atmospheric layers as urban input" missing_value="-9999.0"/>
+
+      <var name="p8w" type="real" dimensions="nVertLevels nCells Time" units="Pa"
+                description="pressure for each atmospheric layer as urban input" missing_value="-9999.0"/>
+
+      <var name="t_phy" type="real" dimensions="nVertLevels nCells Time" units="K"
+                description="temperature for each atmospheric layer as urban input" missing_value="-9999.0"/>
+
+      <var name="swdown" type="real" dimensions="nCells Time" units="W m^-2"
+                description="surface downward solar radiation as urban input" missing_value="-9999.0"/>
+
+      <var name="rainbl" type="real" dimensions="nCells Time" units="mm s^-1"
+                description="total precipitation rate as urban input" missing_value="-9999.0"/>
+
+ </var_struct>
+
+
+ <var_struct name="output_slucm" time_levs="1" packages="sf_urb_slucm_in">
+
+      <var name="psim_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban similarity stability function for momentum" missing_value="-9999.0"/>
+
+      <var name="psih_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban similarity stability function for heat" missing_value="-9999.0"/>
+
+      <var name="u10_urb2d" type="real" dimensions="nCells Time" units="m s^-1"
+                description="urban wind speed at 10m" missing_value="-9999.0"/>
+
+      <var name="v10_urb2d" type="real" dimensions="nCells Time" units="m s^-1"
+                description="urban meridional wind speed at 10m" missing_value="-9999.0"/>
+      
+      <var name="gz1oz0_urb2d" type="real" dimensions="nCells Time" units="unitless"
+                description="urban logarithmic ratio of z1 to roughness length" missing_value="-9999.0"/>
+      
+      <var name="akms_urb2d" type="real" dimensions="nCells Time" units="m s^-1"
+                description="urban momentum exchange coefficient" missing_value="-9999.0"/>
+      
+      <var name="th2_urb2d" type="real" dimensions="nCells Time" units="K"
+                description="urban potential temperature at 2m" missing_value="-9999.0"/>
+      
+      <var name="q2_urb2d" type="real" dimensions="nCells Time" units="kg kg^-1"
+                description="urban specific humidity at 2m" missing_value="-9999.0"/>
+      
+      <var name="ust_urb2d" type="real" dimensions="nCells Time" units="m s^-1"
+                description="urban friction velocity" missing_value="-9999.0"/>
+
+ </var_struct>
+
+<!-- ========================================================================================================= -->
+

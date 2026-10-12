@@ -107,6 +107,8 @@
                                   config_radt_sw_scheme,    &
                                   config_sfclayer_scheme
 
+ integer,pointer:: config_urban_physics
+
 !-----------------------------------------------------------------------------------------------------------------
 !call mpas_log_write('')
 !call mpas_log_write('--- enter subroutine physics_namelist_check:')
@@ -121,6 +123,7 @@
  call mpas_pool_get_config(configs,'config_radt_lw_scheme'   ,config_radt_lw_scheme   )
  call mpas_pool_get_config(configs,'config_radt_sw_scheme'   ,config_radt_sw_scheme   )
  call mpas_pool_get_config(configs,'config_sfclayer_scheme'  ,config_sfclayer_scheme  )
+ call mpas_pool_get_config(configs,'config_urban_physics'    ,config_urban_physics    )
 
  call mpas_log_write('')
  call mpas_log_write('----- Setting up physics suite '''//trim(config_physics_suite)//''' -----')
@@ -304,6 +307,16 @@
           trim(config_lsm_scheme)
     call physics_error_fatal(mpas_err_message)
 
+ endif
+
+ ! urban physics scheme: has to be activated together with NoahMP LSM
+ if( (config_urban_physics < 0) .or. (config_urban_physics > 1) .or. &
+     ((config_urban_physics == 1) .and. (config_lsm_scheme .ne. 'sf_noahmp')) ) then
+ 
+    call physics_error_fatal('urban physics scheme: ' // &
+                             'set config_urban_physics to 0 or 1; ' // &
+                             'urban model currently only works with Noah-MP LSM')
+    
  endif
 
 !checks if any physics process is called. if not, return:

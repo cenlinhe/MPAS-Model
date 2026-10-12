@@ -404,6 +404,7 @@
  logical,pointer:: config_frac_seaice
  logical,pointer:: config_microp_re
 
+ integer,pointer:: config_urban_physics
 
  integer,pointer:: cam_dim1
  integer,pointer:: nMonths
@@ -427,6 +428,7 @@
  call mpas_pool_get_config(configs,'config_microp_scheme'    ,config_microp_scheme    )
  call mpas_pool_get_config(configs,'config_radt_lw_scheme'   ,config_radt_lw_scheme   )
  call mpas_pool_get_config(configs,'config_radt_sw_scheme'   ,config_radt_sw_scheme   )
+ call mpas_pool_get_config(configs,'config_urban_physics'    ,config_urban_physics    )
 
  call mpas_pool_get_config(configs,'config_conv_interval'    ,config_conv_interval    )
  call mpas_pool_get_config(configs,'config_pbl_interval'     ,config_pbl_interval     )

@@ -21,6 +21,7 @@
  use mpas_atmphys_driver_seaice,only: allocate_seaice,deallocate_seaice,driver_seaice
  use mpas_atmphys_driver_sfclayer
  use mpas_atmphys_driver_oml
+ use mpas_atmphys_driver_sf_urban
  use mpas_atmphys_constants
  use mpas_atmphys_interface
  use mpas_atmphys_sfc_diagnostics,only: atmphys_sfc_diagnostics
@@ -66,7 +67,9 @@
 ! driver_cloudiness           : driver for parameterization of fractional cloudiness.
 ! driver_convection           : driver for parameterization of convection.
 ! driver_gwdo                 : driver for parameterization of gravity wave drag over orography.
-! driver_lsm                  : driver for land-surface scheme.
+! driver_lsm                  : driver for Noah land-surface scheme.
+! driver_lsm_noahmp           : driver for Noah-MP land surface scheme
+! driver_sf_urban             : driver for urban physics scheme
 ! driver_pbl                  : driver for planetary boundary layer scheme.
 ! driver_radiation_sw         : driver for short wave radiation schemes.
 ! driver_radiation_lw         : driver for long wave radiation schemes.
@@ -102,6 +105,11 @@
 !   Laura D. Fowler (laura@ucar.edu) / 2016-06-04.
 ! * added call to the Noah-MP land surface scheme.
 !   Laura D. Fowler (laura@ucar.edu) / 2024-03-11.
+! * update call to the Noah-MP land surface scheme.
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-01.
+! * added call to the single-layer urban physics scheme.
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-08.
+
 
 
  contains
@@ -129,7 +137,11 @@
                                  tend_physics,        &
                                  atm_input,           &
                                  ngw_input,           &
-                                 sfc_input
+                                 sfc_input,           &
+                                 diag_physics_urban,  &
+                                 diag_physics_slucm,  &
+                                 output_urban,        &
+                                 output_slucm
 
  logical,pointer:: config_frac_seaice
 
@@ -141,6 +153,8 @@
                                   config_radt_lw_scheme,    &
                                   config_radt_sw_scheme,    &
                                   config_sfclayer_scheme
+
+ integer,pointer:: config_urban_physics
 
  logical, pointer:: config_oml1d
  real(kind=RKIND),pointer:: config_bucket_radt
@@ -171,6 +185,7 @@
  call mpas_pool_get_config(domain%configs,'config_bucket_update'    ,config_bucket_update    )
  call mpas_pool_get_config(domain%configs,'config_frac_seaice'      ,config_frac_seaice      ) 
  call mpas_pool_get_config(domain%configs,'config_oml1d'            ,config_oml1d            )
+ call mpas_pool_get_config(domain%configs,'config_urban_physics'    ,config_urban_physics    )
 
  if(config_convection_scheme .ne. 'off' .or. &
     config_lsm_scheme        .ne. 'off' .or. &
@@ -192,6 +207,10 @@
     call mpas_pool_get_subpool(block%structs,'sfc_input'          ,sfc_input          )
     call mpas_pool_get_subpool(block%structs,'ngw_input'          ,ngw_input          )
     call mpas_pool_get_subpool(block%structs,'tend_physics'       ,tend_physics       )
+    call mpas_pool_get_subpool(block%structs,'diag_physics_urban' ,diag_physics_urban )
+    call mpas_pool_get_subpool(block%structs,'diag_physics_slucm' ,diag_physics_slucm )
+    call mpas_pool_get_subpool(block%structs,'output_urban'       ,output_urban       )
+    call mpas_pool_get_subpool(block%structs,'output_slucm'       ,output_slucm       )
 
     call mpas_pool_get_dimension(block%dimensions,'nThreads',nThreads)
 
@@ -292,11 +311,25 @@
        call deallocate_lsm
 
        elseif(config_lsm_scheme == 'sf_noahmp') then
-          do thread=1,nThreads
+          do thread=1,nThreads  ! should not loop over threads due to global mpas_noahmp (not work with OpenMP)
              call driver_lsm_noahmp(block%configs,mesh,state,time_lev,diag,diag_physics,   &
                                     diag_physics_noahmp,output_noahmp,sfc_input,itimestep, &
                                     cellSolveThreadStart(thread),cellSolveThreadEnd(thread))
           enddo
+
+          !call to urban physics scheme (now only works with NoahMP LSM)
+          if(config_urban_physics > 0) then
+             if(config_urban_physics == 1) then
+!$OMP PARALLEL DO
+                do thread=1,nThreads
+                   call driver_sf_urban(block%configs,mesh,diag,state,itimestep,time_lev,xtime_s, &
+                                       sfc_input,diag_physics,diag_physics_slucm,output_slucm, &
+                                       diag_physics_urban,output_urban,&
+                                       cellSolveThreadStart(thread),cellSolveThreadEnd(thread))
+                enddo
+!$OMP END PARALLEL DO
+             endif
+          endif
        endif
 
        call allocate_seaice(block%configs)
