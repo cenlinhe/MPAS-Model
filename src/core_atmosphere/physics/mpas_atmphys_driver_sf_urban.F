@@ -93,7 +93,7 @@
  real(kind=RKIND),dimension(:,:),  pointer :: dz8w,t_phy,p8w
  real(kind=RKIND),dimension(:,:,:),pointer :: scalars
 
- integer,pointer :: sf_urban_physics,nSoilLevels
+ integer,pointer :: sf_urban_physics,nSoilLevels,config_distributed_ahe
  integer,pointer :: num_roof_layers,num_wall_layers,num_road_layers
  integer, dimension(:), pointer :: ivgtyp,utype_urb2d
 
@@ -118,7 +118,8 @@
  real(kind=RKIND),dimension(:),pointer :: flxhumvg_urb2d,flxhumt_urb2d
  real(kind=RKIND),dimension(:),pointer :: hgt_urb2d,lb_urb2d,lp_urb2d
  real(kind=RKIND),dimension(:),pointer :: stdh_urb2d,lf_urb2d_s,z0_urb2
-d
+ real(kind=RKIND),dimension(:),pointer :: t2mxy,q2mxy,psfc,th2m,u10,v10,psim,psih,gz1oz0
+
  real(kind=RKIND),dimension(:,:),pointer :: trl_urb3d,tgrl_urb3d,smr_urb3d
  real(kind=RKIND),dimension(:,:),pointer :: tbl_urb3d
  real(kind=RKIND),dimension(:,:),pointer :: tgl_urb3d,tvgl_urb3d,smg_urb3d
@@ -223,6 +224,7 @@ d
 
      ! pass in other direct mpas variables
      ! generic mpas variables
+     call mpas_pool_get_config(configs,'config_distributed_ahe',config_distributed_ahe)
      call mpas_get_timeInterval(mpas_get_clock_timestep(clock, ierr), dt=dt)
      call mpas_pool_get_dimension(mesh ,'nSoilLevels',nSoilLevels    )
      call mpas_pool_get_dimension(mesh ,'nRoofLevels',num_roof_layers)
@@ -241,6 +243,8 @@ d
      call mpas_pool_get_array(sfc_input,'lf_urb2d_s' ,lf_urb2d_s     )
      call mpas_pool_get_array(sfc_input,'z0_urb2d'   ,z0_urb2d       )
      call mpas_pool_get_array(sfc_input,'vegfra'     ,vegfra         )
+     call mpas_pool_get_array(sfc_input,'ahe_urb2d'  ,ahe_urb2d      )
+     call mpas_pool_get_array(diag     ,'surface_pressure',psfc      )
      ! mpas physics variable
      call mpas_pool_get_array(diag_physics,'coszr'    ,coszr    )
      call mpas_pool_get_array(diag_physics,'swddir'   ,swddir   )
@@ -253,6 +257,15 @@ d
      call mpas_pool_get_array(diag_physics,'grdflx'   ,grdflx   )
      call mpas_pool_get_array(diag_physics,'sfc_emiss',sfc_emiss)
      call mpas_pool_get_array(diag_physics,'qsfc'     ,qsfc     )
+     call mpas_pool_get_array(diag_physics,'th2m'     ,th2m     )
+     call mpas_pool_get_array(diag_physics,'psim'     ,psim     )
+     call mpas_pool_get_array(diag_physics,'psih'     ,psih     )
+     call mpas_pool_get_array(diag_physics,'u10'      ,u10      )
+     call mpas_pool_get_array(diag_physics,'v10'      ,v10      )
+     call mpas_pool_get_array(diag_physics,'gz1oz0'   ,gz1oz0   )
+     ! noahmp diagnostic variable
+     call mpas_pool_get_array(output_noahmp,'t2mxy'   ,t2mxy    )
+     call mpas_pool_get_array(output_noahmp,'q2mxy'   ,q2mxy    )
      ! generic urban variables
      call mpas_pool_get_array(diag_physics_urban,'sh_urb2d',sh_urb2d)
      call mpas_pool_get_array(diag_physics_urban,'lh_urb2d',lh_urb2d)
@@ -348,7 +361,11 @@ d
                        utype_urb2d = utype_urb2d, chs = chs, chs2 = chs2, cqs2 = cqs2,         &
                        lp_urb2d = lp_urb2d, lb_urb2d = lb_urb2d, hgt_urb2d = hgt_urb2d,        &
                        mh_urb2d = mh_urb2d, stdh_urb2d = stdh_urb2d, lf_urb2d = lf_urb2d,      &
-                       lf_urb2d_s = lf_urb2d_s, z0_urb2d = z0_urb2d, vegfra = vegfra           &
+                       lf_urb2d_s = lf_urb2d_s, z0_urb2d = z0_urb2d, vegfra = vegfra,          &
+                       T2 = t2mxy, Q2 = q2mxy, PSFC = psfc, TH2 = th2m, U10 = u10, V10 = v10,  &
+                       PSIM = psim, PSIH = psih, GZ1OZ0 = gz1oz0,                              &
+                       distributed_ahe_opt = config_distributed_ahe, gmt = gmt,                &
+                       xtime =xtime_m, ahe_urb2d = ahe_urb2d                                   &
                        !--- multi-layer urban vars below (make optional; no BEP,BEM coupling now)
                        !num_urban_ndm, urban_map_zrd, urban_map_zwd, urban_map_gd,             &
                        !urban_map_zd, urban_map_zdf,  urban_map_bd, urban_map_wd,              &

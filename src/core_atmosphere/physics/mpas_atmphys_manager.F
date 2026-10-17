@@ -28,6 +28,7 @@
  integer, public:: julday               !Initial Julian day.
  real(kind=RKIND), public:: curr_julday !Current Julian day (= 0.0 at 0Z on January 1st).
  real(kind=RKIND), public:: gmt         !Greenwich mean time hour of model start (hr)
+ real(kind=RKIND), public:: xtime_m     !minutes since simulation starts (min)
 
 !defines alarms for calling the long- and short-wave radiation codes, for calling the convec-
 !tion scheme:
@@ -178,7 +179,7 @@
  character(len=StrKIND)   :: timeStamp
  integer:: ierr
  real(kind=RKIND):: utc_s
- real(kind=RKIND):: xtime_m
+! real(kind=RKIND):: xtime_m
 
 !-----------------------------------------------------------------------------------------------------------------
 !call mpas_log_write('')
@@ -200,6 +201,7 @@
  call mpas_pool_get_config(domain%blocklist%configs,'config_deepsoiltemp_update',config_deepsoiltemp_update)
 
 !update the current julian day and current year:
+ xtime_m = xtime_s / 60.0
 
  currTime = mpas_get_clock_time(clock,MPAS_NOW,ierr)
  call mpas_get_time(curr_time=currTime,dateTimeString=timeStamp,YYYY=yr,MM=month,DD=day,H=h,M=m, &

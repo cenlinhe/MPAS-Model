@@ -345,8 +345,8 @@ USE mpas_kind_types
                     CMCR,TGR,TGRL,SMR,CMGR_URB,CHGR_URB,jmonth,       & ! H
                     DRELR,DRELB,DRELG,FLXHUMR,FLXHUMB,FLXHUMG,        &
                     TVG,TT,XXXVG,TVGL,SMG,CMCG,FLXHUMVG,FLXHUMT,      & ! H (add in urban-nbs)
-                    lf_urb_s, z0_urb, vegfrac_in                      & ! I (distributed aerodynamics)
-                    )
+                    lf_urb_s, z0_urb, vegfrac_in,                     & ! I (distributed aerodynamics)
+                    EMISS )
    IMPLICIT NONE
 
    REAL(kind=RKIND), PARAMETER    :: CP=0.24          ! heat capacity of dry air  [cgs unit]  ! cal/g/c
@@ -515,7 +515,8 @@ USE mpas_kind_types
    REAL(kind=RKIND), INTENT(INOUT) :: CHR_URB
    REAL(kind=RKIND), INTENT(INOUT) :: CMC_URB
    REAL(kind=RKIND), INTENT(INOUT) :: CHC_URB
-   REAL(kind=RKIND), INTENT(INOUT) :: ZNT  ! roughness length                       [m]    ! modified by danli
+   REAL(kind=RKIND), INTENT(INOUT) :: ZNT     ! roughness length       [m]    ! modified by danli
+   REAL(kind=RKIND), INTENT(INOUT) :: EMISS   ! diagnostic total urban emissivity
 !-------------------------------------------------------------------------------
 ! I: NUDAPT Input Parameters
 !-------------------------------------------------------------------------------
@@ -1135,7 +1136,7 @@ USE mpas_kind_types
        ELSE                                           ! XI <= tan2 in the sun - completely illuminated
          SDT = SD * (2. * RTREE * SQRT(1. + XI**2.))/(2. * PI * RTREE)
        END IF
-       print*, 'THEATAZ is:', THEATAZ      ! urban-nbs for testing purpose
+       ! print*, 'THEATAZ is:', THEATAZ      ! urban-nbs for testing purpose
        
 
        CALL SHADOW_TREE(XI, HGT, RW, HTREE, RTREE, DTREE, CHI_SHADED, ETA_SHADED, CHI_SHADED_TREE, ETA_SHADED_TREE)
@@ -1230,9 +1231,9 @@ USE mpas_kind_types
      ALPHAB = RHO * CP * CHB * UA
      ALPHAG = RHO * CP * CHG * UA
    ELSE
-   CALL SFCDIF_URB (ZA,Z0R,T1VR,TH2V,UA,AKANDA_URBAN,CMR_URB,CHR_URB,RLMO_URB,CDR)
-   ALPHAR =  RHO*CP*CHR_URB
-   CHR=ALPHAR/RHO/CP/UA
+     CALL SFCDIF_URB (ZA,Z0R,T1VR,TH2V,UA,AKANDA_URBAN,CMR_URB,CHR_URB,RLMO_URB,CDR)
+     ALPHAR =  RHO*CP*CHR_URB
+     CHR=ALPHAR/RHO/CP/UA
    END IF
 
 ! Yang, 03/12/2014 -- LH for impervious roof surface  
@@ -1605,27 +1606,27 @@ ENDIF
          DELEGDTG=RHO*EL*CHG*UA*BETG*DQS0GDTG*100.
          DELEGDTB=0.
        ELSE
-       HB=RHO*CP*CHB*UC*(TBP-TCP)*100.
-       HG=RHO*CP*CHG*UC*(TGP-TCP)*100.
+         HB=RHO*CP*CHB*UC*(TBP-TCP)*100.
+         HG=RHO*CP*CHG*UC*(TGP-TCP)*100.
 
-       DTCDTB=W*ALPHAB/(RW*ALPHAC+RW*ALPHAG+W*ALPHAB)       
-       DTCDTG=RW*ALPHAG/(RW*ALPHAC+RW*ALPHAG+W*ALPHAB)
+         DTCDTB=W*ALPHAB/(RW*ALPHAC+RW*ALPHAG+W*ALPHAB)       
+         DTCDTG=RW*ALPHAG/(RW*ALPHAC+RW*ALPHAG+W*ALPHAB)
 
-       DHBDTB=RHO*CP*CHB*UC*(1.-DTCDTB)*100.
-       DHBDTG=RHO*CP*CHB*UC*(0.-DTCDTG)*100.
-       DHGDTG=RHO*CP*CHG*UC*(1.-DTCDTG)*100.
-       DHGDTB=RHO*CP*CHG*UC*(0.-DTCDTB)*100.
+         DHBDTB=RHO*CP*CHB*UC*(1.-DTCDTB)*100.
+         DHBDTG=RHO*CP*CHB*UC*(0.-DTCDTG)*100.
+         DHGDTG=RHO*CP*CHG*UC*(1.-DTCDTG)*100.
+         DHGDTB=RHO*CP*CHG*UC*(0.-DTCDTB)*100.
 
-       ELEB=RHO*EL*CHB*UC*BETB*(QS0B-QCP)*100.
-       ELEG=RHO*EL*CHG*UC*BETG*(QS0G-QCP)*100.
+         ELEB=RHO*EL*CHB*UC*BETB*(QS0B-QCP)*100.
+         ELEG=RHO*EL*CHG*UC*BETG*(QS0G-QCP)*100.
 
-       DQCDTB=W*ALPHAB*BETB*DQS0BDTB/(RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB)    
-       DQCDTG=RW*ALPHAG*BETG*DQS0GDTG/(RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB)
+         DQCDTB=W*ALPHAB*BETB*DQS0BDTB/(RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB)    
+         DQCDTG=RW*ALPHAG*BETG*DQS0GDTG/(RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB)
 
-       DELEBDTB=RHO*EL*CHB*UC*BETB*(DQS0BDTB-DQCDTB)*100.
-       DELEBDTG=RHO*EL*CHB*UC*BETB*(0.-DQCDTG)*100.
-       DELEGDTG=RHO*EL*CHG*UC*BETG*(DQS0GDTG-DQCDTG)*100.
-       DELEGDTB=RHO*EL*CHG*UC*BETG*(0.-DQCDTB)*100.
+         DELEBDTB=RHO*EL*CHB*UC*BETB*(DQS0BDTB-DQCDTB)*100.
+         DELEBDTG=RHO*EL*CHB*UC*BETB*(0.-DQCDTG)*100.
+         DELEGDTG=RHO*EL*CHG*UC*BETG*(DQS0GDTG-DQCDTG)*100.
+         DELEGDTB=RHO*EL*CHG*UC*BETG*(0.-DQCDTB)*100.
        ENDIF
 
        G0B=AKSB*(TBP-TBL(1))/(DZB(1)/2.)
@@ -1656,17 +1657,17 @@ ENDIF
        IF (distributed_aerodynamics_option) THEN
          DTC = 0.0
        ELSE 
-       TC1=RW*ALPHAC+RW*ALPHAG+W*ALPHAB
-       TC2=RW*ALPHAC*TA+RW*ALPHAG*TGP+W*ALPHAB*TBP
-       TC=TC2/TC1
+         TC1=RW*ALPHAC+RW*ALPHAG+W*ALPHAB
+         TC2=RW*ALPHAC*TA+RW*ALPHAG*TGP+W*ALPHAB*TBP
+         TC=TC2/TC1
 
-       QC1=RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB
-       QC2=RW*ALPHAC*QA+RW*ALPHAG*BETG*QS0G+W*ALPHAB*BETB*QS0B
-       QC=QC2/QC1
+         QC1=RW*ALPHAC+RW*ALPHAG*BETG+W*ALPHAB*BETB
+         QC2=RW*ALPHAC*QA+RW*ALPHAG*BETG*QS0G+W*ALPHAB*BETB*QS0B
+         QC=QC2/QC1
 
-       DTC=TCP - TC
-       TCP=TC
-       QCP=QC
+         DTC=TCP - TC
+         TCP=TC
+         QCP=QC
        END IF
 
        IF( ABS(F) < 0.000001 .AND. ABS(DTB) < 0.000001 &
@@ -2120,11 +2121,6 @@ ENDIF
          TGP = MAX(223.15, MIN(353.15, TGP))
          TVGP = MAX(223.15, MIN(353.15, TVGP))
 
-         !IF (distributed_aerodynamics_option) THEN
-            !DTC = 0.0
-         !ELSE
-
-         
          TC1 = RW * ALPHAC + RW * FVG * ALPHAVG + RW * (1 - FVG) * ALPHAG + W * ALPHAB
          TC2 = RW * ALPHAC * TA + RW * FVG * ALPHAVG * TVGP + RW * (1 - FVG) * ALPHAG * TGP + W * ALPHAB * TBP + 2 * RTREE * LAI_TREE * (HT/100)
          TC = TC2 / TC1
@@ -2373,7 +2369,7 @@ ENDIF
    IF (distributed_aerodynamics_option) THEN
      FLXUV = CDC * UA * UA
    ELSE
-   FLXUV  = ( R*CDR + RW*CDC )*UA*UA
+     FLXUV  = ( R*CDR + RW*CDC )*UA*UA
    ENDIF
    FLXG =   ( R*G0R + W*G0B + RW*G0G )
    LNET =     R*RR + W*RB + RW*RG
@@ -2446,13 +2442,13 @@ ENDIF
 !m   TS = TA + FLXTH/CH/UA    ! surface potential temp (flux temp)
 !m   QS = QA + FLXHUM/CH/UA   ! surface humidity
 !
-   !IF (distributed_aerodynamics_option) THEN      ! comment this in the new version (urban-nbs comment)
-   !  TS = TA + FLXTH / (ALPHAC / (RHO * CP))  ! surface potential temp (flux temp)
-   !  QS = QA + FLXHUM / (ALPHAC / (RHO * CP)) ! surface humidity
-   !ELSE																				  
-   TS = TA + FLXTH/CHS    ! surface potential temp (flux temp)
-   QS = QA + FLXHUM/CHS   ! surface humidity
-  ! END IF
+   IF (distributed_aerodynamics_option) THEN
+     TS = TA + FLXTH / (ALPHAC / (RHO * CP))  ! surface potential temp (flux temp)
+     QS = QA + FLXHUM / (ALPHAC / (RHO * CP)) ! surface humidity
+   ELSE																				  
+     TS = TA + FLXTH/CHS    ! surface potential temp (flux temp)
+     QS = QA + FLXHUM/CHS   ! surface humidity
+   END IF
 
 !-------------------------------------------------------
 !  diagnostic  GRID AVERAGED  U10  V10  TH2  Q2 --> WRF
@@ -2532,16 +2528,18 @@ ENDIF
 !   TH2 = TS + (TA-TS)*(PSIT2/PSIT)   ! potential temp at 2 m [K]
 !  TH2 = TS + (TA-TS)*(PSIT2/PSIT)   ! Fei: this seems to be temp (not potential) at 2 m [K]
 !Fei: consistant with M-O theory
-   IF (distributed_aerodynamics_option) THEN       ! comment this in the new version (urban-nbs comment)
+   IF (distributed_aerodynamics_option) THEN 
      CHS2_LOCAL = 0.4 * UST / (ALOG(2. / Z0H) - PSIH2)
      TH2 = TS + (TA - TS) * (CHS_LOCAL / CHS2_LOCAL)
      Q2 = QS + (QA - QS) * (CHS_LOCAL / CHS2_LOCAL)
    ELSE
-   TH2 = TS + (TA-TS) *(CHS/CHS2) 
-   Q2 = QS + (QA-QS)*(PSIT2/PSIT)    ! humidity at 2 m       [-]
+     TH2 = TS + (TA-TS) *(CHS/CHS2) 
+     Q2 = QS + (QA-QS)*(PSIT2/PSIT)    ! humidity at 2 m       [-]
    END IF
 
-!   TS = (LW/SIG_SI/0.88)**0.25       ! Radiative temperature [K]
+!   TS = (LW/SIG_SI/0.92)**0.25       ! Radiative temperature [K]
+! cenlin (10/17/2026): add emiss_urb diagnostic output
+    EMISS = max(min(LW/SIG_SI/(TS**4.),1.0),0.8) ! set a bound: 0.8~1.0
 
    END SUBROUTINE urban
 !===============================================================================
@@ -3718,7 +3716,7 @@ ENDIF
 !m
 !FS   FRC_URB2D(I)=0.
       UTYPE_URB2D(I)=0
-      distributed_aerodynamics_check: IF (distributed_aerodynamics_option) THEN   ! comment this in the new version (urban-nbs comment)
+      distributed_aerodynamics_check: IF (distributed_aerodynamics_option) THEN 
         IF (IVGTYP(I) == ISURBAN) THEN
           UTYPE_URB2D(I) = 2
         ELSE

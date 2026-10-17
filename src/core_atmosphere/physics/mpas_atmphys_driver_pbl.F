@@ -13,6 +13,8 @@
 
  use mpas_atmphys_constants
  use mpas_atmphys_vars
+ use mpas_atmphys_date_time, only: cal_mon_day
+ use mpas_atmphys_manager, only : gmt,curr_julday,year,xtime_m 
 
  use bl_mynn,only: bl_mynn_init
  use module_bl_mynn,only: mynn_bl_driver
@@ -78,6 +80,8 @@
 !   Laura D. Fowler (laura@ucar.edu) / 2024-02-14.
 ! * updated the MYNN PBL scheme to the sourcecode from WRF version 4.6.
 !   Laura D. Fowler (laura@ucar.edu) / 2024-02.15.
+! * Add urban anthropogenic heat flux to heating rate/tendency
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-17
 
 
  contains
@@ -542,11 +546,11 @@
  integer,intent(in):: its,ite
 
 !local variables:
- integer:: i,k,j
+ integer:: i,k,j,jmonth,jday,ihour
 
 !local pointers:
  character(len=StrKIND),pointer:: pbl_scheme
-
+ integer,pointer:: config_urban_physics,config_distributed_ahe
  integer,dimension(:),pointer:: kpbl
 
  real(kind=RKIND),dimension(:),pointer  :: hpbl
@@ -564,6 +568,7 @@
  real(kind=RKIND),dimension(:,:),pointer:: cldfrac_bl,qc_bl,qi_bl
  real(kind=RKIND),dimension(:,:),pointer:: edmf_a,edmf_ent,edmf_qc,edmf_qt,edmf_thl,edmf_w
  real(kind=RKIND),dimension(:,:),pointer:: sub_thl,sub_qv,det_thl,det_qv
+ real(kind=RKIND),dimension(:,:),pointer:: ahe_urb2d,dz8w
 
 !-----------------------------------------------------------------------------------------------------------------
 
@@ -720,6 +725,22 @@
     case default
 
  end select pbl_select
+
+! add urban anthropogenic heat flux to tendency
+ call mpas_pool_get_config(configs,'config_urban_physics',config_urban_physics)
+ call mpas_pool_get_config(configs,'config_distributed_ahe',config_distributed_ahe)
+
+ if ( (config_urban_physics == 1) .and. (config_distributed_ahe == 1) ) then
+    call mpas_pool_get_array(sfc_input,'ahe_urb2d',ahe_urb2d)
+    call mpas_pool_get_array(output_urban,'dz8w',dz8w)
+    
+    call cal_mon_day(curr_julday, year, jmonth, jday)
+    ihour = (jmonth - 1) * 24 + mod(int(gmt + xtime_m / 60.0), 24)
+    do i = its, ite
+       ! Volumetric heat capacity of air = 1200 J/(K m3)
+       rthblten(1,i) = rthblten(1,i) + ahe_urb2d(ihour,i)/1200.0/dz8w(1,i)
+    enddo
+ endif
 
  end subroutine pbl_to_MPAS
  

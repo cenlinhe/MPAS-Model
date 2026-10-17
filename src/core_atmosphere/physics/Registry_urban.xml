@@ -16,6 +16,9 @@
       <dim name="FOUR" definition="4"
                 description="Number 4 (for urban frontal four directions)"/>
 
+      <dim name="nMonHrs" definition="288"
+                description="Number 288 (for anthropogenic heat data month_hour)"/>
+
  </dims>
 
 
@@ -73,6 +76,10 @@
                 description="urban roughness length"
                 packages="sf_urb_slucm_in"/>
 
+      <var name="ahe_urb2d" type="real" dimensions="nMonHrs nCells Time" units="W m^-2"
+                description="anthropogenic heat emission"
+                packages="sf_urb_slucm_in"/>
+
  </var_struct>
 
 
@@ -88,6 +95,10 @@
            description="option for using 2D spatial surface drag input data for SLUCM"
            possible_values=".true. or .false"/>
 
+      <nml_option name="config_distributed_ahe" type="integer" default_value="0"
+           units="-"
+           description="option for use 2-D anthropogenic urban heat data"
+           possible_values="0 to 2"/>
 
  </nml_record>
 

@@ -10,6 +10,7 @@
  use mpas_kind_types
  use mpas_pool_routines
  use mpas_timekeeping
+ use mpas_atmphys_utilities
 
  use mpas_atmphys_driver_convection,only: init_convection
  use mpas_atmphys_driver_lsm,only: init_lsm
@@ -428,6 +429,10 @@ use mpas_stream_manager
  if(config_lsm_scheme .ne. 'off') then
     if(config_lsm_scheme .eq. 'sf_noah') then
        call init_lsm(dminfo,mesh,configs,diag_physics,sfc_input)
+       !urban model does not work with Noah LSM in MPAS
+       if (config_urban_physics > 0) then
+          call physics_error_fatal('Noah LSM does not work with urban model in MPAS')
+       endif
     elseif(config_lsm_scheme .eq. 'sf_noahmp') then
        call init_lsm_noahmp(configs,mesh,clock,diag_physics,diag_physics_noahmp,output_noahmp,sfc_input)
        !initialization of urban model (only work with NoahMP now)
