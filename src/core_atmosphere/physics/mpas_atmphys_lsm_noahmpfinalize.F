@@ -12,7 +12,7 @@
  use mpas_atmphys_vars,only: mpas_noahmp
  use NoahmpIOVarFinalizeMod,only: NoahmpIOVarFinalizeDefault
 
-
+ implicit none
  private
  public:: sf_noahmp_deallocate
 

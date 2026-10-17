@@ -93,7 +93,7 @@
  real(kind=RKIND),dimension(:,:),  pointer :: dz8w,t_phy,p8w
  real(kind=RKIND),dimension(:,:,:),pointer :: scalars
 
- integer,pointer :: sf_urban_physics,nSoilLevels,
+ integer,pointer :: sf_urban_physics,nSoilLevels
  integer,pointer :: num_roof_layers,num_wall_layers,num_road_layers
  integer, dimension(:), pointer :: ivgtyp,utype_urb2d
 
@@ -319,13 +319,11 @@ d
                        SWDDIR = swddir, SWDDIF = swddif, GLW = glw, P8W3D = p8w,               &
                        RAINBL = rainbl, DZ8W = dz8w, ZNT = znt, TSK = skintemp,                &
                        HFX = hfx, QFX = qfx, LH = lh, GRDFLX = grdflx, ALBEDO = sfc_albedo,    &
-                       EMISS = sfc_emiss, QSFC = qsfc, ids = ids, ide = ide, jds = jds,        &
-                       jde = jde, kds = kds, kde = kde, ims = ims, ime = ime, jms = jms,       &
-                       jme = jme, kms = kms, kme = kme, its = its, ite = ite, jts = jts,       &
-                       jte = jte, kts = kts, kte = kte, cmr_sfcdif = cmr_sfcdif,               &
-                       chr_sfcdif = chr_sfcdif, cmc_sfcdif = cmc_sfcdif,                       &
-                       chc_sfcdif = chc_sfcdif, cmgr_sfcdif = cmgr_sfcdif,                     &
-                       chgr_sfcdif = chgr_sfcdif, tr_urb2d = tr_urb2d, tb_urb2d = tb_urb2d,    &
+                       EMISS = sfc_emiss, QSFC = qsfc, its = its, ite = ite, kts = kts,        &
+                       kte = kte, cmr_sfcdif = cmr_sfcdif, chr_sfcdif = chr_sfcdif,            &
+                       cmc_sfcdif = cmc_sfcdif, chc_sfcdif = chc_sfcdif,                       &
+                       cmgr_sfcdif = cmgr_sfcdif, chgr_sfcdif = chgr_sfcdif,                   &
+                       tr_urb2d = tr_urb2d, tb_urb2d = tb_urb2d,                               &
                        tg_urb2d = tg_urb2d, tc_urb2d = tc_urb2d, qc_urb2d = qc_urb2d,          &
                        uc_urb2d = uc_urb2d, xxxr_urb2d = xxxr_urb2d, xxxb_urb2d = xxxb_urb2d,  &
                        xxxg_urb2d = xxxg_urb2d, xxxc_urb2d = xxxc_urb2d,trl_urb3d = trl_urb3d, &

@@ -16,7 +16,6 @@
       <dim name="FOUR" definition="4"
                 description="Number 4 (for urban frontal four directions)"/>
 
-
  </dims>
 
 
@@ -78,6 +77,16 @@
 
 
  <nml_record name="physics_sf_urban" in_defaults="true">
+
+      <nml_option name="config_urban_use_lcz" type="integer" default_value="0"
+           units="-"
+           description="option for using urban LCZ input map"
+           possible_values="0 or 1"/>
+
+      <nml_option name="config_slucm_distributed_drag" type="logical" default_value="false"
+           units="-"
+           description="option for using 2D spatial surface drag input data for SLUCM"
+           possible_values=".true. or .false"/>
 
 
  </nml_record>

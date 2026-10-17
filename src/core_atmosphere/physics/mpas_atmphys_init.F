@@ -23,7 +23,8 @@
  use mpas_atmphys_landuse
  use mpas_atmphys_o3climatology
  use mpas_atmphys_lsm_noahmpinit,only: init_lsm_noahmp
-
+ use mpas_atmphys_sf_urbaninit,  only: init_sf_urban
+ 
  use bl_ugwpv1_ngw, only: ugwpv1_ngw_init
 
  implicit none
@@ -75,14 +76,17 @@
 !   Laura D. Fowler (laura@ucar.edu) / 2024-03-11.
 ! * added initialization of the integer variable mp_top_level to the physics_init code.
 !   Bill Skamarock / 2025-10-17 
+! * update call to subroutine init_lsm_noahmp to initialize the Noah-MP land surface scheme.
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-01.
+! * added call to subroutine init_sf_urban to initialize the urban physics scheme.
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-15.
 
  contains
 
 
 !=================================================================================================================
  subroutine physics_init(dminfo,stream_manager,clock,configs,mesh,diag,tend,tend_physics,state,time_lev,diag_physics, &
-                         diag_physics_noahmp,ngw_input,atm_input,sfc_input,output_noahmp, &
-                         diag_physics_urban,diag_physics_slucm,output_urban,output_slucm)
+                         diag_physics_noahmp,ngw_input,atm_input,sfc_input,output_noahmp,diag_physics_urban,diag_physics_slucm)
 !=================================================================================================================
 
 use mpas_stream_manager
@@ -109,8 +113,6 @@ use mpas_stream_manager
  type(mpas_pool_type),intent(inout):: output_noahmp
  type(mpas_pool_type),intent(inout):: diag_physics_urban
  type(mpas_pool_type),intent(inout):: diag_physics_slucm
- type(mpas_pool_type),intent(inout):: output_urban
- type(mpas_pool_type),intent(inout):: output_slucm
 
 !local pointers:
  logical,pointer:: config_do_restart,    &
@@ -428,12 +430,12 @@ use mpas_stream_manager
        call init_lsm(dminfo,mesh,configs,diag_physics,sfc_input)
     elseif(config_lsm_scheme .eq. 'sf_noahmp') then
        call init_lsm_noahmp(configs,mesh,clock,diag_physics,diag_physics_noahmp,output_noahmp,sfc_input)
+       !initialization of urban model (only work with NoahMP now)
+       if (config_urban_physics > 0) then
+          call init_sf_urban(dminfo,mesh,configs,diag_physics,sfc_input, &
+                             diag_physics_urban,diag_physics_slucm)
+       endif
     endif
- endif
-
-!initialization of land-surface model:
- if(config_urban_physics > 0) then
-    call init_sf_urban(dminfo,mesh,configs,diag_physics,sfc_input)
  endif
 
 !initialization of shortwave radiation processes:

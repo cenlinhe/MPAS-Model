@@ -22,6 +22,7 @@
  use NoahmpReadTableMod,     only : NoahmpReadTable
  use SnowInputSnicarMod,     only : SnowInputSnicar
 
+ implicit none
  private
  public:: init_lsm_noahmp
 

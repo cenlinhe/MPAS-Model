@@ -3207,7 +3207,6 @@ ENDIF
       else if (name == "ROOF_WIDTH") then
          ALLOCATE( ROOF_WIDTH(ICATE), stat=allocate_status )
          if(allocate_status /= 0) FATAL_ERROR('Error allocating ROOF_WIDTH in urban_param_init')
-
          read(string(indx+1:),*) roof_width(1:icate)
       else if (name == "ROAD_WIDTH") then
          ALLOCATE( ROAD_WIDTH(ICATE), stat=allocate_status )
@@ -3523,7 +3522,7 @@ ENDIF
 !
 !===========================================================================
    SUBROUTINE urban_var_init(ISURBAN, TSURFACE0_URB,TLAYER0_URB,TDEEP0_URB,IVGTYP,  & ! in
-                             its,ite,jts,jte,kts,kte,num_soil_layers,         & ! in
+                             its,ite,kts,kte,num_soil_layers,              & ! in
                              LCZ_1,LCZ_2,LCZ_3,LCZ_4,LCZ_5,                &
                              LCZ_6,LCZ_7,LCZ_8,LCZ_9,LCZ_10,LCZ_11,        & 
                              restart,sf_urban_physics,                     & !in
@@ -3572,131 +3571,131 @@ ENDIF
    IMPLICIT NONE
 
    INTEGER, INTENT(IN) :: ISURBAN, sf_urban_physics,use_wudapt_lcz
-   INTEGER, INTENT(IN) :: LCZ_1,LCZ_2,LCZ_3,LCZ_4,LCZ_5,LCZ_6,LCZ_7,LCZ_8,LCZ_9,LCZ_10,LCZ_11
-   INTEGER, INTENT(IN) :: ims,ime,jms,jme,kms,kme,num_soil_layers
-   INTEGER, INTENT(IN) :: num_urban_ndm
-   INTEGER, INTENT(IN) :: urban_map_zrd
-   INTEGER, INTENT(IN) :: urban_map_zwd
-   INTEGER, INTENT(IN) :: urban_map_gd
-   INTEGER, INTENT(IN) :: urban_map_zd
-   INTEGER, INTENT(IN) :: urban_map_zdf
-   INTEGER, INTENT(IN) :: urban_map_bd
-   INTEGER, INTENT(IN) :: urban_map_wd
-   INTEGER, INTENT(IN) :: urban_map_gbd
-   INTEGER, INTENT(IN) :: urban_map_fbd
-   INTEGER, INTENT(IN) :: urban_map_zgrd
-   INTEGER, INTENT(IN) :: num_urban_hi                                !multi-layer urban
+   INTEGER, OPTIONAL, INTENT(IN) :: LCZ_1,LCZ_2,LCZ_3,LCZ_4,LCZ_5,LCZ_6,LCZ_7,LCZ_8,LCZ_9,LCZ_10,LCZ_11
+   INTEGER, INTENT(IN) :: its,ite,kts,kte,num_soil_layers
+   INTEGER, OPTIONAL, INTENT(IN) :: num_urban_ndm
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_zrd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_zwd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_gd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_zd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_zdf
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_bd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_wd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_gbd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_fbd
+   INTEGER, OPTIONAL, INTENT(IN) :: urban_map_zgrd
+   INTEGER, OPTIONAL, INTENT(IN) :: num_urban_hi     !multi-layer urban
    INTEGER, INTENT(IN) :: num_roof_layers, num_wall_layers, num_road_layers
 
    REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(IN)                    :: TSURFACE0_URB
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:num_soil_layers  ), INTENT(IN) :: TLAYER0_URB
+   REAL(kind=RKIND), DIMENSION( 1:num_soil_layers, its:ite  ), INTENT(IN) :: TLAYER0_URB
    REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(IN)                    :: TDEEP0_URB
    INTEGER, DIMENSION( its:ite  ), INTENT(IN)                 :: IVGTYP
    LOGICAL , INTENT(IN) :: restart
  
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TR_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TB_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TC_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: QC_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: XXXR_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: XXXB_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: XXXG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: XXXC_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TB_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TC_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: QC_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: XXXR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: XXXB_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: XXXG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: XXXC_URB2D
 
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: DRELR_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: DRELB_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: DRELG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMR_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMB_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: CMCR_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TGR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: DRELR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: DRELB_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: DRELG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMB_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: CMCR_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TGR_URB2D
 
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_roof_layers ), INTENT(INOUT) :: TRL_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_wall_layers ), INTENT(INOUT) :: TBL_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_road_layers ), INTENT(INOUT) :: TGL_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_roof_layers ), INTENT(INOUT) :: TGRL_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_roof_layers ), INTENT(INOUT) :: SMR_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_roof_layers, its:ite ), INTENT(INOUT) :: TRL_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_wall_layers, its:ite ), INTENT(INOUT) :: TBL_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_road_layers, its:ite ), INTENT(INOUT) :: TGL_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_roof_layers, its:ite ), INTENT(INOUT) :: TGRL_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_roof_layers, its:ite ), INTENT(INOUT) :: SMR_URB3D
 
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: SH_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: LH_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: G_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: RN_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TS_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: SH_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: LH_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: G_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: RN_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TS_URB2D
 
 !-----------add for urban-nbs ----------------
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TVG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: TT_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: XXXVG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: CMCG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMVG_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMT_URB2D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_road_layers ), INTENT(INOUT) :: TVGL_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_road_layers ), INTENT(INOUT) :: SMG_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TVG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: TT_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: XXXVG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: CMCG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMVG_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: FLXHUMT_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_road_layers ), INTENT(INOUT) :: TVGL_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_road_layer, its:ites ), INTENT(INOUT) :: SMG_URB3D
 !---------------- end ------------------										 
 ! multi-layer UCM variables
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zrd ), INTENT(INOUT) :: TRB_URB4D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zwd ), INTENT(INOUT) :: TW1_URB4D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zwd ), INTENT(INOUT) :: TW2_URB4D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_gd  ), INTENT(INOUT) :: TGB_URB4D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_bd  ), INTENT(INOUT) :: TLEV_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_bd  ), INTENT(INOUT) :: QLEV_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_wd  ), INTENT(INOUT) :: TW1LEV_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_wd  ), INTENT(INOUT) :: TW2LEV_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_gbd ), INTENT(INOUT) :: TGLEV_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_fbd ), INTENT(INOUT) :: TFLEV_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: LF_AC_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: SF_AC_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: CM_AC_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: SFVENT_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: LFVENT_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_wd ), INTENT(INOUT) :: SFWIN1_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_wd ), INTENT(INOUT) :: SFWIN2_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zd  ), INTENT(INOUT) :: SFW1_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zd  ), INTENT(INOUT) :: SFW2_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:urban_map_zdf ), INTENT(INOUT) :: SFR_URB3D
-   REAL(kind=RKIND), DIMENSION(its:ite, 1:num_urban_ndm ), INTENT(INOUT) :: SFG_URB3D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: EP_PV_URB3D!GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf  ),INTENT(INOUT) :: T_PV_URB3D!GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zgrd ),INTENT(INOUT) :: TRV_URB4D ! GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zgrd ),INTENT(INOUT) :: QR_URB4D ! GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite ), INTENT(INOUT) :: QGR_URB3D ! GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite ), INTENT(INOUT) :: TGR_URB3D ! GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf ),INTENT(INOUT) :: DRAIN_URB4D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: DRAINGR_URB3D   !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf ),INTENT(INOUT) :: SFRV_URB3D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf ),INTENT(INOUT) :: LFRV_URB3D ! GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf ),INTENT(INOUT) :: DGR_URB3D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:num_urban_ndm ),INTENT(INOUT) :: DG_URB3D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:urban_map_zdf ),INTENT(INOUT) :: LFR_URB3D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:num_urban_ndm ),INTENT(INOUT) :: LFG_URB3D !GRZ
-   REAL(kind=RKIND), DIMENSION( its:ite, 1:num_soil_layers ), INTENT(IN) :: SMOIS_URB
-   REAL(kind=RKIND), DIMENSION( its:ite,1:num_urban_hi  ), INTENT(INOUT) :: HI_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: LP_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: LB_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: HGT_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: MH_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: STDH_URB2D
-   REAL(kind=RKIND), DIMENSION( its:ite, 4 ), INTENT(INOUT) :: LF_URB2D
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: A_U_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: A_V_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: A_T_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: A_Q_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: A_E_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: B_U_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: B_V_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: B_T_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: B_Q_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: B_E_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: VL_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: DLG_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: SF_BEP
-   REAL(kind=RKIND), DIMENSION(its:ite, kts:kte ), INTENT(INOUT) :: DL_U_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zrd, its:ite ), INTENT(INOUT) :: TRB_URB4D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zwd, its:ite ), INTENT(INOUT) :: TW1_URB4D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zwd, its:ite ), INTENT(INOUT) :: TW2_URB4D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_gd,  its:ite ), INTENT(INOUT) :: TGB_URB4D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_bd,  its:ite ), INTENT(INOUT) :: TLEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_bd,  its:ite ), INTENT(INOUT) :: QLEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_wd,  its:ite ), INTENT(INOUT) :: TW1LEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_wd,  its:ite ), INTENT(INOUT) :: TW2LEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_gbd, its:ite ), INTENT(INOUT) :: TGLEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_fbd, its:ite ), INTENT(INOUT) :: TFLEV_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: LF_AC_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: SF_AC_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: CM_AC_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: SFVENT_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: LFVENT_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_wd,  its:ite ), INTENT(INOUT) :: SFWIN1_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_wd,  its:ite ), INTENT(INOUT) :: SFWIN2_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zd,  its:ite ), INTENT(INOUT) :: SFW1_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zd,  its:ite ), INTENT(INOUT) :: SFW2_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ), INTENT(INOUT) :: SFR_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_urban_ndm, its:ite ), INTENT(INOUT) :: SFG_URB3D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: EP_PV_URB3D!GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf,  its:ite ),INTENT(INOUT) :: T_PV_URB3D!GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zgrd, its:ite ),INTENT(INOUT) :: TRV_URB4D ! GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zgrd, its:ite ),INTENT(INOUT) :: QR_URB4D ! GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite ), INTENT(INOUT) :: QGR_URB3D ! GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite ), INTENT(INOUT) :: TGR_URB3D ! GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ),INTENT(INOUT) :: DRAIN_URB4D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: DRAINGR_URB3D   !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ),INTENT(INOUT) :: SFRV_URB3D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ),INTENT(INOUT) :: LFRV_URB3D ! GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ),INTENT(INOUT) :: DGR_URB3D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_urban_ndm, its:ite ),INTENT(INOUT) :: DG_URB3D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:urban_map_zdf, its:ite ),INTENT(INOUT) :: LFR_URB3D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_urban_ndm, its:ite ),INTENT(INOUT) :: LFG_URB3D !GRZ
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_soil_layers, its:ite ), INTENT(IN) :: SMOIS_URB
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 1:num_urban_hi, its:ite  ), INTENT(INOUT) :: HI_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: LP_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: LB_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: HGT_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: MH_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( its:ite  ), INTENT(INOUT) :: STDH_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( 4,its:ite ), INTENT(INOUT) :: LF_URB2D
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: A_U_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: A_V_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: A_T_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: A_Q_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: A_E_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: B_U_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: B_V_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: B_T_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: B_Q_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: B_E_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: VL_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: DLG_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: SF_BEP
+   REAL(kind=RKIND), OPTIONAL, DIMENSION( kts:kte, its:ite ), INTENT(INOUT) :: DL_U_BEP
 !
    REAL(kind=RKIND), DIMENSION( its:ite  ), INTENT(INOUT) :: FRC_URB2D
-   INTEGER, DIMENSION( its:ite  ), INTENT(INOUT) :: UTYPE_URB2D
-   INTEGER                                       :: UTYPE_URB
+   INTEGER,          DIMENSION( its:ite  ), INTENT(INOUT) :: UTYPE_URB2D
+   INTEGER :: UTYPE_URB
 !FS
    INTEGER :: SWITCH_URB
 
@@ -5425,7 +5424,7 @@ FUNCTION kanda_kawai_svf(lp, lf) RESULT (svf)
   
    ! Check constraints
    IF ((2.*rt > W) .OR. (ht + rt > H)) THEN
-         CALL wrf_error_fatal('Invalid tree geometry in VF_TREE_ANALYTICAL: 2*rt must be <= W and ht + rt <= H')
+         CALL FATAL_ERROR('Invalid tree geometry in VF_TREE_ANALYTICAL: 2*rt must be <= W and ht + rt <= H')
    END IF
 
    ! Spatial integration step

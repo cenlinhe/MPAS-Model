@@ -12,13 +12,13 @@
  use mpas_pool_routines
  use mpas_timer,only: mpas_timer_start, mpas_timer_stop
 
- use mpas_atmphys_constants,only: R_d,R_v
- use mpas_atmphys_manager,only  : year,curr_julday,month,day
- use mpas_atmphys_vars,only     : mpas_noahmp,xice_threshold
+ use mpas_atmphys_constants, only : R_d,R_v
+ use mpas_atmphys_manager,   only : year,curr_julday,month,day
+ use mpas_atmphys_vars,      only : mpas_noahmp,xice_threshold
 
-
+ use module_sf_urban,        only : iri_scheme
  use NoahmpIOVarType
- use NoahmpDriverMainMod,only: NoahmpDriverMain
+ use NoahmpDriverMainMod,    only : NoahmpDriverMain
 
  implicit none
  private
@@ -136,11 +136,10 @@
  mpas_noahmp%month        = month
  mpas_noahmp%day          = day
  mpas_noahmp%julian       = curr_julday 
- mpas_noahmp%iri_urban    = 0  ! need to connect to iri_scheme in URBPARM.TBL when coupling urban
+ mpas_noahmp%iri_urban    = iri_scheme  ! connect to iri_scheme in URBPARM.TBL when coupling urban
 
 !--- initialization of xice_threshold:
  mpas_noahmp%xice_threshold = xice_threshold
-
 
 !--- initialization of INPUT surface variables:
  call mpas_pool_get_array(sfc_input,'shdmax',shdmax)
