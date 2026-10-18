@@ -362,6 +362,10 @@ USE mpas_kind_types
    REAL(kind=RKIND), PARAMETER    :: ELL=2.442E+06    ! latent heat of vaporization [J/kg]
    REAL(kind=RKIND), PARAMETER    :: XKA=2.4E-5
 
+  INTEGER, INTENT(IN) :: num_roof_layers
+  INTEGER, INTENT(IN) :: num_wall_layers
+  INTEGER, INTENT(IN) :: num_road_layers
+
 ! -----------------------------------  Newly Define Urban Vegetation (NbS) Related Variables (Yuqi) -------------------------------------
    !-------------------------------------------------------------------------------
    ! H: Historical (state) variables of Urban : LSM <--> Urban
@@ -414,10 +418,10 @@ USE mpas_kind_types
    REAL(kind=RKIND) :: EPSGE     ! Effective Surface Emissivity of Ground
    REAL(kind=RKIND) :: RVG1,RVG2,RVG,RT1,RT2,RT   ! Longwave Radiation Received by Vegetated Ground/Tree 
    REAL(kind=RKIND) :: RLEAF     ! Longwave Radiation Received by Tree averaged by Leaf Area
-   REAL(kind=RKIND)(Kind = 8) :: DRBDTVG1,DRBDTVG2,DRBDTT1,DRBDTT2,DRGDTVG1,DRGDTVG2,DRGDTT1,DRGDTT2,DRVGDTB1,DRVGDTB2,DRVGDTVG1,DRVGDTVG2 ! derivatives wrt temperature (radiation)
-   REAL(kind=RKIND)(Kind = 8) :: DRVGDTG1,DRVGDTG2,DRVGDTT1,DRVGDTT2,DRTDTB1,DRTDTB2,DRTDTG1,DRTDTG2,DRTDTVG1,DRTDTVG2,DRTDTT1,DRTDTT2     ! derivatives wrt temperature (radiation)
-   REAL(kind=RKIND)(Kind = 8) :: DRBDTVG,DRBDTT,DRGDTVG,DRGDTT,DRVGDTB,DRVGDTG,DRVGDTVG,DRVGDTT,DRTDTB,DRTDTG,DRTDTVG,DRTDTT               ! derivatives wrt temperature (radiation)
-   REAL(kind=RKIND)(Kind = 8) :: DHBDTVG,DHBDTT,DHGDTVG,DHGDTT,DHVGDTB,DHVGDTG,DHVGDTVG,DHVGDTT,DHTDTB,DHTDTG,DHTDTVG,DHTDTT               ! derivatives wrt temperature (sensible heat)
+   REAL(kind = 8) :: DRBDTVG1,DRBDTVG2,DRBDTT1,DRBDTT2,DRGDTVG1,DRGDTVG2,DRGDTT1,DRGDTT2,DRVGDTB1,DRVGDTB2,DRVGDTVG1,DRVGDTVG2 ! derivatives wrt temperature (radiation)
+   REAL(kind = 8) :: DRVGDTG1,DRVGDTG2,DRVGDTT1,DRVGDTT2,DRTDTB1,DRTDTB2,DRTDTG1,DRTDTG2,DRTDTVG1,DRTDTVG2,DRTDTT1,DRTDTT2     ! derivatives wrt temperature (radiation)
+   REAL(kind = 8) :: DRBDTVG,DRBDTT,DRGDTVG,DRGDTT,DRVGDTB,DRVGDTG,DRVGDTVG,DRVGDTT,DRTDTB,DRTDTG,DRTDTVG,DRTDTT               ! derivatives wrt temperature (radiation)
+   REAL(kind = 8) :: DHBDTVG,DHBDTT,DHGDTVG,DHGDTT,DHVGDTB,DHVGDTG,DHVGDTVG,DHVGDTT,DHTDTB,DHTDTG,DHTDTVG,DHTDTT               ! derivatives wrt temperature (sensible heat)
    REAL(kind=RKIND) :: HVG       ! Sensible Heat Flux by Vegetated Ground
    REAL(kind=RKIND) :: HT        ! Sensible Heat Flux by Tree
    REAL(kind=RKIND) :: RA_LEAF   ! Leaf Boundary Layer Resistent (Empirical Calculated)
@@ -430,11 +434,11 @@ USE mpas_kind_types
    CHARACTER(LEN=256)   :: WARN_MSG ! A character string for the warning message
    REAL(kind=RKIND), DIMENSION(1:num_road_layers) :: SROOT, SROOTP     ! Root Water Uptake (m/s)
    REAL(kind=RKIND) :: DES,MIX,DMIX,QSAT,DQSAT,ESAT,DESAT,DELEBDTVG,DELEBDTT,DELEGDTVG,DELEGDTT,DELEVGDTB,DELEVGDTG ! derivatives wrt humidity/saturation
-   REAL(kind=RKIND)(Kind = 8) :: DRS_LEAF, M,D,DD,FE,DFE,S,DM,KK,L,N
-   REAL(kind=RKIND)(Kind = 8) :: DELEVGDTVG,DELEVGDTT,DELETDTB,DELETDTG,DELETDTVG,DELETDTT,DTCDTVG,DTCDTT ! derivatives wrt temperature (latent heat)
+   REAL(kind = 8) :: DRS_LEAF, M,D,DD,FE,DFE,S,DM,KK,L,N
+   REAL(kind = 8) :: DELEVGDTVG,DELEVGDTT,DELETDTB,DELETDTG,DELETDTVG,DELETDTT,DTCDTVG,DTCDTT ! derivatives wrt temperature (latent heat)
    REAL(kind=RKIND) :: DQCDTVG,DQCDTT,ELEVG,KVG,G0VG,DG0BDTVG,DG0BDTT,DG0GDTVG,DG0GDTT,DG0VGDTB,DG0VGDTG,DG0VGDTVG,DG0VGDTT ! derivatives wrt temperature
-   REAL(kind=RKIND)(Kind = 8) :: WF,A,B,C,E,FF,GG,H,VGF,I,J,O,P,CHARA,det,det_tol,det_scale        
-   REAL(kind=RKIND)(Kind = 8) :: A_use,FF_use,KK_use,lambda,relax,W2_num,W2_den,den_qc
+   REAL(kind = 8) :: WF,A,B,C,E,FF,GG,H,VGF,I,J,O,P,CHARA,det,det_tol,det_scale        
+   REAL(kind = 8) :: A_use,FF_use,KK_use,lambda,relax,W2_num,W2_den,den_qc
    REAL(kind=RKIND) :: max_step
    REAL(kind=RKIND) :: SSOILG  ! Soil Heat Flux output from SHFLX W/m2  
    REAL(kind=RKIND) :: TGE, TGEP, QS0GE, ALPHAGE, FLXTHVG, FLXTHT ! effective ground values
@@ -474,11 +478,6 @@ USE mpas_kind_types
 !  The following variables are also model configuration variables, but are 
 !  defined in the URBAN.TBL and in the contains statement in the top of 
 !  the module_urban_init, so we should not declare them here.
-
-  INTEGER, INTENT(IN) :: num_roof_layers
-  INTEGER, INTENT(IN) :: num_wall_layers
-  INTEGER, INTENT(IN) :: num_road_layers
-
 
   REAL(kind=RKIND), INTENT(IN), DIMENSION(1:num_roof_layers) :: DZR ! grid interval of roof layers [cm]
   REAL(kind=RKIND), INTENT(IN), DIMENSION(1:num_wall_layers) :: DZB ! grid interval of wall layers [cm]
@@ -3520,7 +3519,8 @@ ENDIF
 !
 !===========================================================================
    SUBROUTINE urban_var_init(ISURBAN, TSURFACE0_URB,TLAYER0_URB,TDEEP0_URB,IVGTYP,  & ! in
-                             its,ite,kts,kte,num_soil_layers,              & ! in
+                             its,ite,kts,kte,num_soil_layers,                       & ! in
+                             num_roof_layers,num_wall_layers,num_road_layers,       & ! in
                              LCZ_1,LCZ_2,LCZ_3,LCZ_4,LCZ_5,                &
                              LCZ_6,LCZ_7,LCZ_8,LCZ_9,LCZ_10,LCZ_11,        & 
                              restart,sf_urban_physics,                     & !in
@@ -3539,7 +3539,7 @@ ENDIF
                              urban_map_wd,                                 & ! in
                              urban_map_gbd,                                & ! in
                              urban_map_fbd,                                & ! in
-                             urban_map_zgrd,                                & ! in
+                             urban_map_zgrd,                               & ! in
                              num_urban_hi,                                 & ! in
                              TRB_URB4D,TW1_URB4D,TW2_URB4D,TGB_URB4D,      & ! inout
                              TLEV_URB3D,QLEV_URB3D,                        & ! inout
@@ -3771,11 +3771,11 @@ ENDIF
                      MH_URB2D(I)=0.
                      STDH_URB2D(I)=0.
                      DO K=1,4
-                       LF_URB2D(I,K)=0.
+                       LF_URB2D(K,I)=0.
                      ENDDO
                   ELSE IF ( ( sf_urban_physics == 2 ) .or. ( sf_urban_physics == 3 ) ) THEN
                      DO K=1,num_urban_hi
-                        HI_URB2D(I,K)=0.
+                        HI_URB2D(K,I)=0.
                      ENDDO
                   ENDIF
                ENDIF
@@ -3797,11 +3797,11 @@ ENDIF
                    MH_URB2D(I)=0.
                    STDH_URB2D(I)=0.
                    DO K=1,4
-                      LF_URB2D(I,K)=0.
+                      LF_URB2D(K,I)=0.
                    ENDDO
                 ELSE IF ( ( sf_urban_physics == 2 ) .or. ( sf_urban_physics == 3 ) ) THEN
                    DO K=1,num_urban_hi
-                      HI_URB2D(I,K)=0.
+                      HI_URB2D(K,I)=0.
                    ENDDO
                 ENDIF
             ENDIF
@@ -3848,29 +3848,29 @@ ENDIF
 !         TRL_URB3D(I,3)=TLAYER0_URB(I,3)+0.
 !         TRL_URB3D(I,4)=TLAYER0_URB(I,4)+0.
 
-          TRL_URB3D(I,1)=TLAYER0_URB(I,1)+0.
-          TRL_URB3D(I,2)=0.5*(TLAYER0_URB(I,1)+TLAYER0_URB(I,2))
-          TRL_URB3D(I,3)=TLAYER0_URB(I,2)+0.
-          TRL_URB3D(I,4)=TLAYER0_URB(I,2)+(TLAYER0_URB(I,3)-TLAYER0_URB(I,2))*0.29
+          TRL_URB3D(1,I)=TLAYER0_URB(1,I)+0.
+          TRL_URB3D(2,I)=0.5*(TLAYER0_URB(1,I)+TLAYER0_URB(2,I))
+          TRL_URB3D(3,I)=TLAYER0_URB(2,I)+0.
+          TRL_URB3D(4,I)=TLAYER0_URB(2,I)+(TLAYER0_URB(3,I)-TLAYER0_URB(2,I))*0.29
 
       IF ( sf_urban_physics == 1 ) THEN
-          TGRL_URB3D(I,1)=TLAYER0_URB(I,1)+0.
-          TGRL_URB3D(I,2)=0.5*(TLAYER0_URB(I,1)+TLAYER0_URB(I,2))
-          TGRL_URB3D(I,3)=TLAYER0_URB(I,2)+0.
-          TGRL_URB3D(I,4)=TLAYER0_URB(I,2)+(TLAYER0_URB(I,3)-TLAYER0_URB(I,2))*0.29
+          TGRL_URB3D(1,I)=TLAYER0_URB(1,I)+0.
+          TGRL_URB3D(2,I)=0.5*(TLAYER0_URB(1,I)+TLAYER0_URB(2,I))
+          TGRL_URB3D(3,I)=TLAYER0_URB(2,I)+0.
+          TGRL_URB3D(4,I)=TLAYER0_URB(2,I)+(TLAYER0_URB(3,I)-TLAYER0_URB(2,I))*0.29
 
-          TVGL_URB3D(I,1)=TLAYER0_URB(I,1)+0.                               ! 4 lines below - urban-nbs
-          TVGL_URB3D(I,2)=0.5*(TLAYER0_URB(I,1)+TLAYER0_URB(I,2))
-          TVGL_URB3D(I,3)=TLAYER0_URB(I,2)+0.
-          TVGL_URB3D(I,4)=TLAYER0_URB(I,2)+(TLAYER0_URB(I,3)-TLAYER0_URB(I,2))*0.29																	   
-          SMR_URB3D(I,1)=0.2
-          SMR_URB3D(I,2)=0.2
-          SMR_URB3D(I,3)=0.2
-          SMR_URB3D(I,4)=0.
-          SMG_URB3D(I,1)=0.2  ! add in urban-nbs
-          SMG_URB3D(I,2)=0.2
-          SMG_URB3D(I,3)=0.2
-          SMG_URB3D(I,4)=0.0											  
+          TVGL_URB3D(1,I)=TLAYER0_URB(1,I)+0.                               ! 4 lines below - urban-nbs
+          TVGL_URB3D(2,I)=0.5*(TLAYER0_URB(1,I)+TLAYER0_URB(2,I))
+          TVGL_URB3D(3,I)=TLAYER0_URB(2,I)+0.
+          TVGL_URB3D(4,I)=TLAYER0_URB(2,I)+(TLAYER0_URB(3,I)-TLAYER0_URB(2,I))*0.29																	   
+          SMR_URB3D(1,I)=0.2
+          SMR_URB3D(2,I)=0.2
+          SMR_URB3D(3,I)=0.2
+          SMR_URB3D(4,I)=0.
+          SMG_URB3D(1,I)=0.2  ! add in urban-nbs
+          SMG_URB3D(2,I)=0.2
+          SMG_URB3D(3,I)=0.2
+          SMG_URB3D(4,I)=0.0											  
       ENDIF
 !     END DO
 
@@ -3881,34 +3881,34 @@ ENDIF
 !m        TBL_URB3D(I,3)=TLAYER0_URB(I,3)+0.
 !m        TBL_URB3D(I,4)=TLAYER0_URB(I,4)+0.
 
-        TBL_URB3D(I,1)=TLAYER0_URB(I,1)+0.
-        TBL_URB3D(I,2)=0.5*(TLAYER0_URB(I,1)+TLAYER0_URB(I,2))
-        TBL_URB3D(I,3)=TLAYER0_URB(I,2)+0.
-        TBL_URB3D(I,4)=TLAYER0_URB(I,2)+(TLAYER0_URB(I,3)-TLAYER0_URB(I,2))*0.29
+        TBL_URB3D(1,I)=TLAYER0_URB(1,I)+0.
+        TBL_URB3D(2,I)=0.5*(TLAYER0_URB(1,I)+TLAYER0_URB(2,I))
+        TBL_URB3D(3,I)=TLAYER0_URB(2,I)+0.
+        TBL_URB3D(4,I)=TLAYER0_URB(2,I)+(TLAYER0_URB(3,I)-TLAYER0_URB(2,I))*0.29
 
 !      END DO
 
       DO K=1,num_road_layers
 !      DO K=1,num_soil_layers
-        TGL_URB3D(I,K)=TLAYER0_URB(I,K)+0.
+        TGL_URB3D(K,I)=TLAYER0_URB(K,I)+0.
       END DO
       
 ! multi-layer urban
        IF((SF_URBAN_PHYSICS.eq.2).OR.(SF_URBAN_PHYSICS.eq.3)) THEN
         IF (UTYPE_URB2D(I) > 0) THEN
-           TRB_URB4D(I,:)=TBLEND_TBL(UTYPE_URB2D(I))
-           TW1_URB4D(I,:)=TBLEND_TBL(UTYPE_URB2D(I))
-           TW2_URB4D(I,:)=TBLEND_TBL(UTYPE_URB2D(I))
+           TRB_URB4D(:,I)=TBLEND_TBL(UTYPE_URB2D(I))
+           TW1_URB4D(:,I)=TBLEND_TBL(UTYPE_URB2D(I))
+           TW2_URB4D(:,I)=TBLEND_TBL(UTYPE_URB2D(I))
         ELSE
-           TRB_URB4D(I,:)=tlayer0_urb(I,1)
-           TW1_URB4D(I,:)=tlayer0_urb(I,1)
-           TW2_URB4D(I,:)=tlayer0_urb(I,1)
+           TRB_URB4D(:,I)=tlayer0_urb(1,I)
+           TW1_URB4D(:,I)=tlayer0_urb(1,I)
+           TW2_URB4D(:,I)=tlayer0_urb(1,I)
         ENDIF
-        TGB_URB4D(I,:)=tlayer0_urb(I,1)
-        SFW1_URB3D(I,:)=0.
-        SFW2_URB3D(I,:)=0.
-        SFR_URB3D(I,:)=0.
-        SFG_URB3D(I,:)=0.
+        TGB_URB4D(:,I)=tlayer0_urb(1,I)
+        SFW1_URB3D(:,I)=0.
+        SFW2_URB3D(:,I)=0.
+        SFR_URB3D(:,I)=0.
+        SFG_URB3D(:,I)=0.
        
        ENDIF 
               
@@ -3919,34 +3919,34 @@ ENDIF
          SFVENT_URB3D(I)=0.
          LFVENT_URB3D(I)=0.
          EP_PV_URB3D(I)=0.
-         T_PV_URB3D(I,:)=tlayer0_urb(I,1)
-         TGR_URB3D(I)=tlayer0_urb(I,1)
-         QR_URB4D(I,:)=SMOIS_URB(I,1)
-         DRAIN_URB4D(I,:)=0. !GRZ
-         SFRV_URB3D(I,:)=0.                !GRZ
-         LFRV_URB3D(I,:)=0.                !GRZ
-         DGR_URB3D(I,:)=0.  !GRZ
-         DG_URB3D(I,:)=0.
-         LFR_URB3D(I,:)=0.
-         LFG_URB3D(I,:)=0.
-         QGR_URB3D(I)=SMOIS_URB(I,1)  !GRZ
+         T_PV_URB3D(:,I)=tlayer0_urb(1,I)
+         TGR_URB3D(I)=tlayer0_urb(1,I)
+         QR_URB4D(:,I)=SMOIS_URB(1,I)
+         DRAIN_URB4D(:,I)=0. !GRZ
+         SFRV_URB3D(:,I)=0.                !GRZ
+         LFRV_URB3D(:,I)=0.                !GRZ
+         DGR_URB3D(:,I)=0.  !GRZ
+         DG_URB3D(:,I)=0.
+         LFR_URB3D(:,I)=0.
+         LFG_URB3D(:,I)=0.
+         QGR_URB3D(I)=SMOIS_URB(1,I)  !GRZ
          TGR_URB3D(I)=0.
          DRAINGR_URB3D(I)=0. !GRZ
 
        IF (UTYPE_URB2D(I) > 0) THEN
-        TRV_URB4D(I,:)=TBLEND_TBL(UTYPE_URB2D(I))
+        TRV_URB4D(:,I)=TBLEND_TBL(UTYPE_URB2D(I))
        ELSE
-       TRV_URB4D(I,:)=tlayer0_urb(I,1) !GRZ
+       TRV_URB4D(:,I)=tlayer0_urb(1,I) !GRZ
       ENDIF
 
-            TLEV_URB3D(I,:)=tlayer0_urb(I,1)
-            TW1LEV_URB3D(I,:)=tlayer0_urb(I,1)
-            TW2LEV_URB3D(I,:)=tlayer0_urb(I,1)
-            TGLEV_URB3D(I,:)=tlayer0_urb(I,1)
-            TFLEV_URB3D(I,:)=tlayer0_urb(I,1)
-            QLEV_URB3D(I,:)=0.01
-            SFWIN1_URB3D(I,:)=0.
-            SFWIN2_URB3D(I,:)=0.
+            TLEV_URB3D(:,I)=tlayer0_urb(1,I)
+            TW1LEV_URB3D(:,I)=tlayer0_urb(1,I)
+            TW2LEV_URB3D(:,I)=tlayer0_urb(1,I)
+            TGLEV_URB3D(:,I)=tlayer0_urb(1,I)
+            TFLEV_URB3D(:,I)=tlayer0_urb(1,I)
+            QLEV_URB3D(:,I)=0.01
+            SFWIN1_URB3D(:,I)=0.
+            SFWIN2_URB3D(:,I)=0.
 !rm         LF_AC_URB3D(I)=0.
 !rm         SF_AC_URB3D(I)=0.
 !rm         CM_AC_URB3D(I)=0.
@@ -3958,20 +3958,20 @@ ENDIF
 !      IF( sf_urban_physics .EQ. 2 )THEN
       IF((SF_URBAN_PHYSICS.eq.2).OR.(SF_URBAN_PHYSICS.eq.3)) THEN
       DO K= kts,kte
-          SF_BEP(I,K)=1.
-          VL_BEP(I,K)=1.
-          A_U_BEP(I,K)=0.
-          A_V_BEP(I,K)=0.
-          A_T_BEP(I,K)=0.
-          A_E_BEP(I,K)=0.
-          A_Q_BEP(I,K)=0.
-          B_U_BEP(I,K)=0.
-          B_V_BEP(I,K)=0.
-          B_T_BEP(I,K)=0.
-          B_E_BEP(I,K)=0.
-          B_Q_BEP(I,K)=0.
-          DLG_BEP(I,K)=0.
-          DL_U_BEP(I,K)=0.
+          SF_BEP(K,I)=1.
+          VL_BEP(K,I)=1.
+          A_U_BEP(K,I)=0.
+          A_V_BEP(K,I)=0.
+          A_T_BEP(K,I)=0.
+          A_E_BEP(K,I)=0.
+          A_Q_BEP(K,I)=0.
+          B_U_BEP(K,I)=0.
+          B_V_BEP(K,I)=0.
+          B_T_BEP(K,I)=0.
+          B_E_BEP(K,I)=0.
+          B_Q_BEP(K,I)=0.
+          DLG_BEP(K,I)=0.
+          DL_U_BEP(K,I)=0.
       END DO
       ENDIF       !sf_urban_physics=2
      ENDIF        !restart
@@ -4061,6 +4061,8 @@ ENDIF
      REAL(kind=RKIND), INTENT(IN) :: TSP,PS,S,EPS,RX,SIG,RHO,CP,CH,UA,QA,TA,EL,BET,AKS,TSL,DZ
      REAL(kind=RKIND), INTENT(OUT) :: TS
      REAL(kind=RKIND) :: ES,QS0,R,H,ELE,G0,F1,F
+     REAL(kind=RKIND) :: TS1, TS2
+     INTEGER :: ITERATION
 
      TS1 = TSP - 5.
      TS2 = TSP + 5.
@@ -4344,7 +4346,8 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD,ZT_OUT,V
      REAL(kind=RKIND)              :: SIGMA, PC, CMC2MS, SGX, DENOM, RTX, ETT1
      INTEGER           :: K
      REAL(kind=RKIND), DIMENSION(1:NROOT) ::  PART, GX
-     
+     REAL(kind=RKIND) :: EA, DELTA, RR
+
      SLV    = 2.501E+6
      SIGMA  = 5.67E-8
      ETT    = 0.0
@@ -5345,6 +5348,7 @@ FUNCTION kanda_kawai_svf(lp, lf) RESULT (svf)
       REAL(kind=RKIND), PARAMETER     :: QC2    = 1.0
       REAL(kind=RKIND), PARAMETER     :: Lv     = 2.26E6
       REAL(kind=RKIND), PARAMETER     :: rWD    = 1.E3  ! density of water [kg/m3]
+      INTEGER :: K
 
       IF (FVG <= 0.0 .OR. RW <= 0.0 .OR. RTREE <= 0.0 .OR. LAI_TREE <= 0.0) THEN
          SROOT(:) = 0.0
@@ -5422,7 +5426,7 @@ FUNCTION kanda_kawai_svf(lp, lf) RESULT (svf)
   
    ! Check constraints
    IF ((2.*rt > W) .OR. (ht + rt > H)) THEN
-         CALL FATAL_ERROR('Invalid tree geometry in VF_TREE_ANALYTICAL: 2*rt must be <= W and ht + rt <= H')
+         FATAL_ERROR('Invalid tree geometry in VF_TREE_ANALYTICAL: 2*rt must be <= W and ht + rt <= H')
    END IF
 
    ! Spatial integration step

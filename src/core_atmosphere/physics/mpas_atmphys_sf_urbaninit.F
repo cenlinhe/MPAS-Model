@@ -167,6 +167,8 @@
      call urban_var_init(ISURBAN = isurban, TSURFACE0_URB = skintemp, TLAYER0_URB = tslb,    &
                          TDEEP0_URB = tmn, IVGTYP = ivgtyp, its = 1, ite = nCellsSolve,      &
                          kts = 1, kte = nVertLevels, num_soil_layers = nSoilLevels,          &
+                         num_roof_layers = num_roof_layers,num_wall_layers = num_wall_layers,&
+                         num_road_layers = num_road_layers,                                  &
                          LCZ_1 = mpas_noahmp%LCZ_1_TABLE, LCZ_2 = mpas_noahmp%LCZ_2_TABLE,   &
                          LCZ_3 = mpas_noahmp%LCZ_3_TABLE, LCZ_4 = mpas_noahmp%LCZ_4_TABLE,   &
                          LCZ_5 = mpas_noahmp%LCZ_5_TABLE, LCZ_6 = mpas_noahmp%LCZ_6_TABLE,   &
