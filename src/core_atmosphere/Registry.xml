@@ -610,6 +610,9 @@
 			<var name="harvest"/>
 			<var name="season_gdd"/>
 			<var name="td_fraction"/>
+			<var name="lf_urb2d_s"/>
+			<var name="z0_urb2d"/>
+			<var name="ahe_urb2d"/>
 #endif
 
                 </stream>
@@ -659,6 +662,13 @@
 			<var name="smois"/>
 			<var name="tslb"/>
 			<var name="h_oml_initial"/>
+			<var name="frc_urb2d"/>
+			<var name="lp_urb2d"/>
+			<var name="lb_urb2d"/>
+			<var name="hgt_urb2d"/>
+			<var name="mh_urb2d"/>
+			<var name="stdh_urb2d"/>
+			<var name="lf_urb2d"/>
 #endif
 		</stream>
 
@@ -935,7 +945,20 @@
 			<var name="h_oml_initial"/>
 			<var name="hu_oml"/>
 			<var name="hv_oml"/>
+                        <var name="frc_urb2d"/>
+                        <var name="lp_urb2d"/>
+                        <var name="lb_urb2d"/>
+                        <var name="hgt_urb2d"/>
+                        <var name="mh_urb2d"/>
+                        <var name="stdh_urb2d"/>
+			<var name="lf_urb2d"/>
+			<var name="utype_urb2d"/>
+			<var name="xlat"/>
+			<var name="xlong"/>
+			<var name="hrang"/>
 			<var_struct name="diag_physics_noahmp"/>
+			<var_struct name="diag_physics_urban"/>
+			<var_struct name="diag_physics_slucm"/>
 #endif
 		</stream>
 

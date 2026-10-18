@@ -41,6 +41,8 @@ set(ATMOSPHERE_CORE_PHYSICS_SOURCES
     mpas_atmphys_driver_lsm_noahmp.F
     mpas_atmphys_lsm_noahmpfinalize.F
     mpas_atmphys_lsm_noahmpinit.F
+    mpas_atmphys_driver_sf_urban.F
+    mpas_atmphys_sf_urbaninit.F
 )
 list(TRANSFORM ATMOSPHERE_CORE_PHYSICS_SOURCES PREPEND physics/)
 

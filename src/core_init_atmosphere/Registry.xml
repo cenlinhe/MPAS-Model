@@ -496,6 +496,11 @@
 			<var name="harvest" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
 			<var name="season_gdd" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
 			<var name="td_fraction" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
+                        <var name="urb_param" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
+                        <var name="frc_urb2d" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
+                        <var name="lf_urb2d_s" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
+                        <var name="z0_urb2d" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
+                        <var name="ahe_urb2d" packages="gwd_stage_in;vertical_stage_in;met_stage_in"/>
 			<var name="var2d" packages="vertical_stage_in;met_stage_in"/>
                         <var name="con" packages="vertical_stage_in;met_stage_in"/>
                         <var name="oa1" packages="vertical_stage_in;met_stage_in"/>
@@ -612,6 +617,16 @@
 			<var name="harvest"/>
 			<var name="season_gdd"/>
 			<var name="td_fraction"/>
+			<var name="frc_urb2d"/>
+			<var name="lp_urb2d" packages="met_stage_out"/>
+			<var name="lb_urb2d" packages="met_stage_out"/>
+			<var name="hgt_urb2d" packages="met_stage_out"/>
+			<var name="mh_urb2d" packages="met_stage_out"/>
+			<var name="stdh_urb2d" packages="met_stage_out"/>
+			<var name="lf_urb2d" packages="met_stage_out"/>
+			<var name="lf_urb2d_s"/>
+			<var name="z0_urb2d"/>
+			<var name="ahe_urb2d"/>
                         <var name="var2d" packages="gwd_stage_out;vertical_stage_out;met_stage_out"/>
                         <var name="con" packages="gwd_stage_out;vertical_stage_out;met_stage_out"/>
                         <var name="oa1" packages="gwd_stage_out;vertical_stage_out;met_stage_out"/>
