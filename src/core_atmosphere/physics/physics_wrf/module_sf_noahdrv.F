@@ -1420,30 +1420,31 @@ CONTAINS
             if (I.eq.73.and.J.eq.125)THEN
                check = 1
             end if
-!
+
+! cenlinhe (10/18/2026): current SLUCM only works with NoahMP in MPAS
 ! Call urban
-            CALL cal_mon_day(julian,julyr,jmonth,jday)
-            CALL urban(LSOLAR_URB,                                      & ! I
-                       num_roof_layers,num_wall_layers,num_road_layers, & ! C
-                       DZR,DZB,DZG,                                     & ! C
-                       UTYPE_URB,TA_URB,QA_URB,UA_URB,U1_URB,V1_URB,SSG_URB, & ! I
-                       SSGD_URB,SSGQ_URB,LLG_URB,RAIN_URB,RHOO_URB,     & ! I
-                       ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
-                       XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
-                       CHS_URB, CHS2_URB,                               & ! I
-                       TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
-                       TRL_URB,TBL_URB,TGL_URB,                         & ! H
-                       XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
-                       TS_URB,QS_URB,SH_URB,LH_URB,LH_KINEMATIC_URB,    & ! O
-                       SW_URB,ALB_URB,LW_URB,G_URB,RN_URB,PSIM_URB,PSIH_URB, & ! O
-                       GZ1OZ0_URB,                                      & !O
-                       CMR_URB, CHR_URB, CMC_URB, CHC_URB,              &
-                       U10_URB, V10_URB, TH2_URB, Q2_URB,               & ! O
-                       UST_URB,mh_urb, stdh_urb, lf_urb, lp_urb,        & ! 0
-                       hgt_urb,frc_urb,lb_urb, check,CMCR_URB,TGR_URB,  & ! H
-                       TGRL_URB,SMR_URB,CMGR_URB,CHGR_URB,jmonth,       & ! H
-                       DRELR_URB,DRELB_URB,                             & ! H
-                       DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB)                            
+!            CALL cal_mon_day(julian,julyr,jmonth,jday)
+!            CALL urban(LSOLAR_URB,                                      & ! I
+!                       num_roof_layers,num_wall_layers,num_road_layers, & ! C
+!                       DZR,DZB,DZG,                                     & ! C
+!                       UTYPE_URB,TA_URB,QA_URB,UA_URB,U1_URB,V1_URB,SSG_URB, & ! I
+!                       SSGD_URB,SSGQ_URB,LLG_URB,RAIN_URB,RHOO_URB,     & ! I
+!                       ZA_URB,DECLIN_URB,COSZ_URB,OMG_URB,              & ! I
+!                       XLAT_URB,DELT_URB,ZNT_URB,                       & ! I
+!                       CHS_URB, CHS2_URB,                               & ! I
+!                       TR_URB, TB_URB, TG_URB, TC_URB, QC_URB,UC_URB,   & ! H
+!                       TRL_URB,TBL_URB,TGL_URB,                         & ! H
+!                       XXXR_URB, XXXB_URB, XXXG_URB, XXXC_URB,          & ! H
+!                       TS_URB,QS_URB,SH_URB,LH_URB,LH_KINEMATIC_URB,    & ! O
+!                       SW_URB,ALB_URB,LW_URB,G_URB,RN_URB,PSIM_URB,PSIH_URB, & ! O
+!                       GZ1OZ0_URB,                                      & !O
+!                       CMR_URB, CHR_URB, CMC_URB, CHC_URB,              &
+!                       U10_URB, V10_URB, TH2_URB, Q2_URB,               & ! O
+!                       UST_URB,mh_urb, stdh_urb, lf_urb, lp_urb,        & ! 0
+!                       hgt_urb,frc_urb,lb_urb, check,CMCR_URB,TGR_URB,  & ! H
+!                       TGRL_URB,SMR_URB,CMGR_URB,CHGR_URB,jmonth,       & ! H
+!                       DRELR_URB,DRELB_URB,                             & ! H
+!                       DRELG_URB,FLXHUMR_URB,FLXHUMB_URB,FLXHUMG_URB)                            
 
 #if 0
           IF(IPRINT) THEN

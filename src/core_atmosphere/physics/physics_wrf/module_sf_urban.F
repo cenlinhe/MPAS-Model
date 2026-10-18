@@ -3635,7 +3635,7 @@ ENDIF
 !-------  multi-layer UCM variables
 ! to temporarily handle optional urban dimension variables (should
 ! remove when BEP/BEM is coupled): cenlinhe Oct 18, 2026
-   REAL(kind=RKIND), OPTIONAL, DIMENSION(1:,its:ite), INTENT(INOUT) :: &
+   REAL(kind=RKIND), OPTIONAL, DIMENSION(1:,its:), INTENT(INOUT) :: &
         TRB_URB4D, TW1_URB4D, TW2_URB4D, TGB_URB4D, &
         TLEV_URB3D, QLEV_URB3D, TW1LEV_URB3D, TW2LEV_URB3D, &
         TGLEV_URB3D, TFLEV_URB3D, &

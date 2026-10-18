@@ -152,7 +152,9 @@ mpas_atmphys_driver_oml.o: \
 
 mpas_atmphys_driver_pbl.o: \
 	mpas_atmphys_constants.o \
-	mpas_atmphys_vars.o
+	mpas_atmphys_vars.o \
+	mpas_atmphys_manager.o \
+	mpas_atmphys_date_time.o
 
 mpas_atmphys_driver_radiation_lw.o: \
 	mpas_atmphys_camrad_init.o \
