@@ -50,6 +50,9 @@
 		     description="The number of crop types as input in the NOAH-MP land surface model"/>
                 <dim name="nUrbParam" definition="132"
                      description="The number of urban parameters as input in the urban physics model"/>
+                <dim name="nMonHrs" definition="288"
+                     description="The number of month_hour for anthropogenic heat data"/>
+
         </dims>
 
 
@@ -1055,7 +1058,7 @@
                      description="urban roughness length as input in urban canopy model"
                      packages="urban"/>
 
-                <var name="ahe_urb2d" type="real" dimensions="nCells" units="W m^-2"
+                <var name="ahe_urb2d" type="real" dimensions="nMonHrs nCells" units="W m^-2"
                      description="anthropogenic heat emission as input in urban canopy model"
                      packages="urban"/>
 

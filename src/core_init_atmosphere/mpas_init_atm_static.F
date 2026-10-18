@@ -90,6 +90,7 @@
  !
  integer (kind=I8KIND), dimension(:), pointer :: ter_integer
  integer (kind=I8KIND), dimension(:), pointer :: surfvar_integer
+ integer (kind=I8KIND), dimension(:,:), pointer :: surfvar3d_integer
  integer (kind=I8KIND), dimension(:,:), pointer :: soilcomp_int
  integer (kind=I8KIND), dimension(:,:), pointer :: croptype_int
  real (kind=RKIND) :: soilcomp_msgval = 255.0_RKIND    ! Modified later based on index file for soilcomp
@@ -131,6 +132,7 @@
  character(len=StrKIND), pointer :: config_albedo_data
  character(len=StrKIND), pointer :: config_maxsnowalbedo_data
  logical, pointer :: config_noahmp_static
+ integer, pointer :: config_urban_static
  character(len=StrKIND), pointer :: config_soilcat_data
  character(len=StrKIND+1) :: geog_data_path      ! same as config_geog_data_path, but guaranteed to have a trailing slash
  character(len=StrKIND+1) :: geog_sub_path       ! subdirectory names in config_geog_data_path, with trailing slash
@@ -229,6 +231,7 @@
  call mpas_pool_get_config(configs, 'config_lu_supersample_factor', supersample_fac_lu)
  call mpas_pool_get_config(configs, 'config_30s_supersample_factor', supersample_fac_30s)
  call mpas_pool_get_config(configs, 'config_noahmp_static', config_noahmp_static)
+ call mpas_pool_get_config(configs, 'config_urban_static', config_urban_static)
 
  write(geog_data_path, '(a)') config_geog_data_path
  i = len_trim(geog_data_path)
@@ -361,6 +364,8 @@
        write(mminlu,'(a)') 'USGS'
     case('MODIFIED_IGBP_MODIS_NOAH', 'MODIFIED_IGBP_MODIS_NOAH_15s')
        write(mminlu,'(a)') 'MODIFIED_IGBP_MODIS_NOAH'
+    case('MODIS_CGLC_LCZ')
+       write(mminlu,'(a)') 'MODIFIED_IGBP_MODIS_NOAH'
     case default
          call mpas_log_write('*****************************************************************', messageType=MPAS_LOG_ERR)
          call mpas_log_write('Invalid land use dataset '''//trim(config_landuse_data) &
@@ -409,6 +414,9 @@
     case('MODIFIED_IGBP_MODIS_NOAH_15s')
        call mpas_log_write('Using 20-class MODIS 15-arc-second land cover dataset')
        geog_sub_path = 'modis_landuse_20class_15s/'
+    case('MODIS_CGLC_LCZ')
+       call mpas_log_write('Using 61-class MODIS-CGLC-LCZ 30-arc-second land cover dataset')
+       geog_sub_path = 'CGLC_MODIS_LCZ_global/'
     case default
        call mpas_log_write('*****************************************************************', messageType=MPAS_LOG_ERR)
        call mpas_log_write('Invalid land use dataset '''//trim(config_landuse_data) &
@@ -1384,8 +1392,61 @@
                              supersample_fac=supersample_fac_30s)
     call mpas_log_write('--- end interpolate TD_FRACTION')
 
- end if
+ endif
 
+ if (config_urban_static) then
+
+    !
+    ! Interpolate FRC_URB2D
+    !
+    geog_sub_path = 'urbfrac_gaia2020_30s/'
+
+    call mpas_log_write('--- start interpolate FRC_URB2D')
+    call interp_surf2D_cont_nomv('frc_urb2d', mesh, tree, trim(geog_data_path)//trim(geog_sub_path), &
+                             supersample_fac=supersample_fac_30s)
+    call mpas_log_write('--- end interpolate FRC_URB2D')
+
+    !
+    ! Interpolate LF_URB2D_S
+    !
+    geog_sub_path = 'slucm/urban_params/2010/lambda_f/'
+
+    call mpas_log_write('--- start interpolate LF_URB2D_S')
+    call interp_surf2D_cont('lf_urb2d_s', mesh, tree, trim(geog_data_path)//trim(geog_sub_path), &
+                             supersample_fac=supersample_fac_30s)
+    call mpas_log_write('--- end interpolate LF_URB2D_S')
+
+    !
+    ! Interpolate Z0_URB2D
+    !
+    geog_sub_path = 'slucm/urban_params/2010/z_0/'
+
+    call mpas_log_write('--- start interpolate Z0_URB2D')
+    call interp_surf2D_cont('z0_urb2d', mesh, tree, trim(geog_data_path)//trim(geog_sub_path), &
+                             supersample_fac=supersample_fac_30s)
+    call mpas_log_write('--- end interpolate Z0_URB2D')
+
+    !
+    ! Interpolate AHE_URB2D
+    !
+    geog_sub_path = 'slucm/AHE_2010s/3_bytes/'
+
+    call mpas_log_write('--- start interpolate AHE_URB2D')
+    call interp_surf3D_cont('ahe_urb2d', 288, mesh, tree, trim(geog_data_path)//trim(geog_sub_path), &
+                             supersample_fac=supersample_fac_30s)
+    call mpas_log_write('--- end interpolate AHE_URB2D')
+
+    !
+    ! Interpolate URB_PARAM
+    !
+    geog_sub_path = 'gloucp2020_30s/'
+
+    call mpas_log_write('--- start interpolate URB_PARAM')
+    call interp_surf3D_cont('urb_param', 132, mesh, tree, trim(geog_data_path)//trim(geog_sub_path), &
+                             supersample_fac=supersample_fac_30s)
+    call mpas_log_write('--- end interpolate URB_PARAM')
+
+ endif
 !
 ! Deallocate and free the KD Tree
 !
@@ -1664,7 +1725,7 @@
 
  end subroutine terrain_interp_accumulation
 
-!***********************************************************************
+ !***********************************************************************
  !
  !  routine surfvar_interp_accumulation
  !
@@ -1690,6 +1751,31 @@
 
  end subroutine surfvar_interp_accumulation
 
+ !***********************************************************************
+ !
+ !  routine surfvar3d_interp_accumulation
+ !
+ !> \brief   Accumulate 3-D surface dataset values
+ !> \author  Cenlin He
+ !> \date    18 Oct 2026
+ !> \details
+ !> This routine accumulates surface variable values for the init_atm_map_static_data unified
+ !> function.
+ !
+ !-----------------------------------------------------------------------
+ subroutine surfvar3d_interp_accumulation(iCell, pixel)
+
+     integer, intent(in) ::iCell
+     integer (kind=I8KIND), dimension(:), intent(in) :: pixel
+
+     if (landmask(iCell) == 0) return
+
+     if (pixel(1) /= surfvar_msgval) then
+        surfvar3d_integer(:,iCell) = surfvar3d_integer(:,iCell) + int(pixel(:), kind=I8KIND)
+        nhs(iCell) = nhs(iCell) + 1
+     end if
+
+ end subroutine surfvar3d_interp_accumulation
 
  !***********************************************************************
  !
@@ -1822,7 +1908,7 @@
 
  end subroutine interp_terrain
 
-!***********************************************************************
+ !***********************************************************************
  !
  !  routine interp_surf2D_cont
  !                   
@@ -1890,9 +1976,11 @@
                                   allow_missing_tiles=.true.)
 
     do iCell = 1, nCells
-       surfvar2D(iCell) = real(real(surfvar_integer(iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
-       surfvar2D(iCell) = surfvar2D(iCell) * scalefactor
-    end do
+       if (nhs(iCell) > 0) then
+         surfvar2D(iCell) = real(real(surfvar_integer(iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
+         surfvar2D(iCell) = surfvar2D(iCell) * scalefactor
+       endif
+    enddo
 
     deallocate(surfvar_integer)
     deallocate(nhs)
@@ -1905,11 +1993,96 @@
 
  end subroutine interp_surf2D_cont
 
-!***********************************************************************
+ !***********************************************************************
+ !
+ !  routine interp_surf2D_cont_nomv
+ !                   
+ !> \brief   Interpolate continous 2-D (lat-lon) surface variable w/o missing value in index file
+ !> \author  Cenlin He
+ !> \date    18 Oct 2026     
+ !> \details
+ !> Interpolate 2-D surface variable by using the init_atm_map_static_data routine and
+ !> accumulating pixel values into cells using surfvar_interp_accumulation.
+ !> mesh, should be a mpas_pool that contains specific vars and the nCells dimension. kdtree
+ !> should be a initialized kdtree of (xCell, yCell, zCell), and geog_data_path
+ !> should be the path to the specific surface variable dataset.
+ !
+ !-----------------------------------------------------------------------
+ subroutine interp_surf2D_cont_nomv(fieldname, mesh, kdtree, geog_data_path, supersample_fac)
+       
+    implicit none
+
+    ! Input variables
+    character (len=*), intent(in) :: fieldname
+    type (mpas_pool_type), intent(inout) :: mesh
+    type (mpas_kd_type), pointer, intent(in) :: kdtree
+    character (len=*), intent(in) :: geog_data_path
+    integer, intent(in), optional :: supersample_fac
+
+    ! Local variables        
+    type (mpas_geotile_mgr_type) :: mgr
+    integer, pointer :: nCells 
+
+    real (kind=RKIND), dimension(:), pointer :: surfvar2D
+!    real (kind=RKIND), pointer :: missing_value
+    real (kind=RKIND), pointer :: scalefactor
+
+    integer :: iCell
+    integer :: ierr
+
+    ierr = mgr % init(trim(geog_data_path))
+    if (ierr /= 0) then
+        call mpas_log_write("Error occurred initializing interpolation for "//trim(geog_data_path), messageType=MPAS_LOG_CRIT)
+        return ! Program execution should not reach this statement since the preceding message is a critical error
+    end if
+
+    call mpas_pool_get_dimension(mesh, 'nCells', nCells)
+    call mpas_pool_get_array(mesh, trim(fieldname), surfvar2D)
+    call mpas_pool_get_config(mgr % pool, 'scale_factor', scalefactor)
+!    call mpas_pool_get_config(mgr % pool, 'missing_value', missing_value)
+
+!    surfvar_msgval = missing_value
+
+    allocate(surfvar_integer(nCells))
+    allocate(nhs(nCells))
+
+    !
+    ! Store tile values as a I8KIND integer temporarily to avoid floating
+    ! point round off differences and to have +/- 9.22x10^18 range of representative
+    ! values. For example, a 120 km mesh with a 1 meter data set with 6 decimal of
+    ! precision will allow for values of 180x10^12.
+    !
+    surfvar2D(:) = 0.0
+    surfvar_integer(:) = 0
+    nhs(:) = 0
+
+    call init_atm_map_static_data(mesh, mgr, kdtree, continuous_interp_criteria, &
+                                  surfvar_interp_accumulation, supersample_fac=supersample_fac, &
+                                  allow_missing_tiles=.true.)
+
+    do iCell = 1, nCells
+       if (nhs(iCell) > 0) then
+         surfvar2D(iCell) = real(real(surfvar_integer(iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
+         surfvar2D(iCell) = surfvar2D(iCell) * scalefactor
+       endif
+    enddo
+
+    deallocate(surfvar_integer)
+    deallocate(nhs)
+
+    ierr = mgr % finalize()
+    if (ierr /= 0) then
+        call mpas_log_write("Error occurred finalizing interpolation for "//trim(geog_data_path), messageType=MPAS_LOG_CRIT)
+        return ! Program execution should not reach this statement since the preceding message is a critical error
+    end if
+
+ end subroutine interp_surf2D_cont_nomv
+
+ !***********************************************************************
  !     
  !  routine interp_surf2D_nosf
  !                   
- !> \brief   Interpolate continous 2-D (lat-lon) surface variable w/o scale factor
+ !> \brief   Interpolate continous 2-D (lat-lon) surface variable w/o scale factor in index file
  !> \author  Cenlin He
  !> \date    15 Sep 2026
  !> \details
@@ -1971,8 +2144,10 @@
                                   allow_missing_tiles=.true.)
 
     do iCell = 1, nCells
-       surfvar2D(iCell) = real(real(surfvar_integer(iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
-    end do
+       if (nhs(iCell) > 0) then
+         surfvar2D(iCell) = real(real(surfvar_integer(iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
+       endif
+    enddo
 
     deallocate(surfvar_integer)
     deallocate(nhs)
@@ -1985,6 +2160,92 @@
 
  end subroutine interp_surf2D_nosf
 
+ !***********************************************************************
+ !
+ !  routine interp_surf3D_cont
+ !                   
+ !> \brief   Interpolate continous 3-D (lat-lon-zdim) surface variable
+ !> \author  Cenlin He
+ !> \date    18 Oct 2026
+ !> \details
+ !> Interpolate 3-D surface variable by using the init_atm_map_static_data routine and
+ !> accumulating pixel values into cells using surfvar_interp_accumulation.
+ !> mesh, should be a mpas_pool that contains specific vars and the nCells dimension. kdtree
+ !> should be a initialized kdtree of (xCell, yCell, zCell), and geog_data_path
+ !> should be the path to the specific surface variable dataset.
+ !
+ !-----------------------------------------------------------------------
+ subroutine interp_surf3D_cont(fieldname, nzdims, mesh, kdtree, geog_data_path, supersample_fac)
+
+    implicit none
+       
+    ! Input variables
+    character (len=*), intent(in) :: fieldname
+    type (mpas_pool_type), intent(inout) :: mesh
+    type (mpas_kd_type), pointer, intent(in) :: kdtree
+    character (len=*), intent(in) :: geog_data_path
+    integer, intent(in), optional :: supersample_fac
+    integer, intent(in) :: nzdims
+
+    ! Local variables
+    type (mpas_geotile_mgr_type) :: mgr
+    integer, pointer :: nCells, ndims_z
+
+    real (kind=RKIND), dimension(:,:), pointer :: surfvar3D
+    real (kind=RKIND), pointer :: missing_value
+    real (kind=RKIND), pointer :: scalefactor
+
+    integer :: iCell
+    integer :: ierr
+
+    ierr = mgr % init(trim(geog_data_path))
+    if (ierr /= 0) then
+        call mpas_log_write("Error occurred initializing interpolation for "//trim(geog_data_path), messageType=MPAS_LOG_CRIT)
+        return ! Program execution should not reach this statement since the preceding message is a critical error
+    end if
+
+    call mpas_pool_get_dimension(mesh, 'nCells', nCells)
+    call mpas_pool_get_array(mesh, trim(fieldname), surfvar3D)
+    call mpas_pool_get_config(mgr % pool, 'scale_factor', scalefactor)
+    call mpas_pool_get_config(mgr % pool, 'missing_value', missing_value)
+
+    ndims_z = nzdims
+    surfvar_msgval = missing_value
+
+    allocate(surfvar3d_integer(ndims_z,nCells))
+    allocate(nhs(nCells))
+
+    !
+    ! Store tile values as a I8KIND integer temporarily to avoid floating
+    ! point round off differences and to have +/- 9.22x10^18 range of representative
+    ! values. For example, a 120 km mesh with a 1 meter data set with 6 decimal of
+    ! precision will allow for values of 180x10^12.
+    !
+    surfvar3D(:,:) = 0.0
+    surfvar3d_integer(:,:) = 0
+    nhs(:) = 0
+
+    call init_atm_map_static_data(mesh, mgr, kdtree, continuous_interp_criteria, &
+                                  surfvar3d_interp_accumulation, supersample_fac=supersample_fac, &
+                                  allow_missing_tiles=.true.)
+
+    do iCell = 1, nCells
+       if (nhs(iCell) > 0) then
+         surfvar3D(:,iCell) = real(real(surfvar3d_integer(:,iCell), kind=R8KIND) / real(nhs(iCell), kind=R8KIND), kind=RKIND)
+         surfvar3D(:,iCell) = surfvar3D(:,iCell) * scalefactor
+       endif
+    enddo
+
+    deallocate(surfvar3d_integer)
+    deallocate(nhs)
+
+    ierr = mgr % finalize()
+    if (ierr /= 0) then
+        call mpas_log_write("Error occurred finalizing interpolation for "//trim(geog_data_path), messageType=MPAS_LOG_CRIT)
+        return ! Program execution should not reach this statement since the preceding message is a critical error
+    end if
+
+ end subroutine interp_surf3D_cont
 
  !***********************************************************************
  !
