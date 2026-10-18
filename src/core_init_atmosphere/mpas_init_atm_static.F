@@ -157,7 +157,7 @@
  real(kind=RKIND),dimension(:,:),allocatable  :: maxsnowalb
  real(kind=RKIND),dimension(:,:,:),allocatable:: vegfra
 
- integer, pointer :: isice_lu, iswater_lu
+ integer, pointer :: isice_lu, iswater_lu, isurban_lu
  integer :: iswater_soil
  integer, pointer :: nCells, nCellsSolve, nEdges, nVertices, maxEdges
  logical, pointer :: on_a_sphere
@@ -273,6 +273,7 @@
  call mpas_pool_get_array(mesh, 'mminlu', mminlu)
  call mpas_pool_get_array(mesh, 'isice_lu', isice_lu)
  call mpas_pool_get_array(mesh, 'iswater_lu', iswater_lu)
+ call mpas_pool_get_array(mesh, 'isurban_lu', isurban_lu)
  call mpas_pool_get_array(mesh, 'soilcat_top', soilcat_top)
  call mpas_pool_get_array(mesh, 'landmask', landmask)
  call mpas_pool_get_array(mesh, 'snoalb', snoalb)
@@ -420,7 +421,7 @@
 
  call mpas_log_write('--- start interpolate LU_INDEX')
  call interp_landuse(mesh, tree, trim(geog_data_path)//trim(geog_sub_path), isice_lu, iswater_lu, &
-                     supersample_fac=supersample_fac_lu)
+                     isurban_lu, supersample_fac=supersample_fac_lu)
  call mpas_log_write('--- end interpolate LU_INDEX')
 
 !
@@ -2257,7 +2258,7 @@
  !> that isice and iswater are in the dataset's index file.
  !
  !-----------------------------------------------------------------------
- subroutine interp_landuse(mesh, kdtree, geog_data_path, isice_lu, iswater_lu, supersample_fac)
+ subroutine interp_landuse(mesh, kdtree, geog_data_path, isice_lu, iswater_lu, isurban_lu, supersample_fac)
 
      implicit none
 
@@ -2267,6 +2268,7 @@
      character (len=*), intent(in) :: geog_data_path
      integer, intent(out) :: isice_lu
      integer, intent(out) :: iswater_lu
+     integer, intent(out) :: isurban_lu
      integer, intent(in), optional :: supersample_fac
 
      ! Local variables
@@ -2274,6 +2276,7 @@
      integer, pointer :: nCells
      integer, pointer :: isice_lu_ptr
      integer, pointer :: iswater_lu_ptr
+     integer, pointer :: isurban_lu_ptr
 
      real (kind=RKIND), pointer :: scalefactor
 
@@ -2293,9 +2296,11 @@
      call mpas_pool_get_config(mgr % pool, 'category_max', category_max)
      call mpas_pool_get_config(mgr % pool, 'isice', isice_lu_ptr)
      call mpas_pool_get_config(mgr % pool, 'iswater', iswater_lu_ptr)
+     call mpas_pool_get_config(mgr % pool, 'isurban', isurban_lu_ptr)
 
      isice_lu = isice_lu_ptr
      iswater_lu = iswater_lu_ptr
+     isurban_lu = isurban_lu_ptr
 
      allocate(ncat(category_min:category_max, nCells))
      ncat(:,:) = 0

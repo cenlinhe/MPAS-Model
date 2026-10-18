@@ -3723,7 +3723,7 @@ ENDIF
           UTYPE_URB2D(I) = 0
         END IF
       ELSE																			   
-      SWITCH_URB=1
+        SWITCH_URB=1
 
             IF( IVGTYP(I) == ISURBAN)  THEN
                IF(use_wudapt_lcz==0) THEN

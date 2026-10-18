@@ -32,51 +32,51 @@
                 description="urban type needed as input in urban canopy model"
                 packages="sf_urban_in"/>
       
-      <var name="lp_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="lp_urb2d" type="real" dimensions="nCells" units="m"
 	        description="urban plan area length"
 	        packages="sf_urban_in"/>
       
-      <var name="lb_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="lb_urb2d" type="real" dimensions="nCells" units="m"
 	        description="urban building length"
 	        packages="sf_urban_in"/>
       
-      <var name="hgt_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="hgt_urb2d" type="real" dimensions="nCells" units="m"
 	        description="urban building height"
 	        packages="sf_urban_in"/>
       
-      <var name="xlat" type="real" dimensions="nCells Time" units="degree"
+      <var name="xlat" type="real" dimensions="nCells" units="degree"
 	        description="latitude of each grid as urban input"
 	        packages="sf_urban_in"/>
 
-      <var name="xlong" type="real" dimensions="nCells Time" units="degree"
+      <var name="xlong" type="real" dimensions="nCells" units="degree"
 	        description="longitude of each grid as urban input"
 	        packages="sf_urban_in"/>
 
-      <var name="hrang" type="real" dimensions="nCells Time" units="degree"
+      <var name="hrang" type="real" dimensions="nCells" units="degree"
 	        description="solar hour angle of each grid as urban input"
 	        packages="sf_urban_in"/>
 
-      <var name="mh_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="mh_urb2d" type="real" dimensions="nCells" units="m"
                 description="urban mean building height"
                 packages="sf_urb_slucm_in"/>
 
-      <var name="stdh_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="stdh_urb2d" type="real" dimensions="nCells" units="m"
                 description="standard deviation of urban building height"
                 packages="sf_urb_slucm_in"/>
 
-      <var name="lf_urb2d" type="real" dimensions="FOUR nCells Time" units="unitless"
+      <var name="lf_urb2d" type="real" dimensions="FOUR nCells" units="unitless"
                 description="urban frontal area index"
                 packages="sf_urb_slucm_in"/>
 
-      <var name="lf_urb2d_s" type="real" dimensions="nCells Time" units="unitless"
+      <var name="lf_urb2d_s" type="real" dimensions="nCells" units="unitless"
                 description="urban mean frontal area index"
                 packages="sf_urb_slucm_in"/>
 
-      <var name="z0_urb2d" type="real" dimensions="nCells Time" units="m"
+      <var name="z0_urb2d" type="real" dimensions="nCells" units="m"
                 description="urban roughness length"
                 packages="sf_urb_slucm_in"/>
 
-      <var name="ahe_urb2d" type="real" dimensions="nMonHrs nCells Time" units="W m^-2"
+      <var name="ahe_urb2d" type="real" dimensions="nMonHrs nCells" units="W m^-2"
                 description="anthropogenic heat emission"
                 packages="sf_urb_slucm_in"/>
 

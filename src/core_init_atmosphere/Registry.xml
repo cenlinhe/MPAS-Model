@@ -20,6 +20,8 @@
                      description="A constant value of 2"/>
                 <dim name="THREE" definition="3"
                      description="A constant value of 3"/>
+                <dim name="FOUR" definition="4"
+                     description="A constant value of  4"/>
                 <dim name="vertexDegree"
                      description="The number of edges or cells that meet at vertices"/>
                 <dim name="FIFTEEN" definition="15"
@@ -45,7 +47,9 @@
                 <dim name="nMonths" definition="namelist:config_months"
                      description="The number of months in a year"/>
                 <dim name="nCrops" definition="5"
-                     description="The number of crop types as needed as input in the NOAH-MP land surface model"/>
+		     description="The number of crop types as input in the NOAH-MP land surface model"/>
+                <dim name="nUrbParam" definition="132"
+                     description="The number of urban parameters as input in the urban physics model"/>
         </dims>
 
 
@@ -209,9 +213,14 @@
                      description="The supersampling factor to be used for 30s terrain, soil category, and MODIS FPAR monthly vegetation fraction (case 7 only)"
                      possible_values="Positive integer values"/>
 
-                <nml_option name="config_noahmp_static" type="logical" default_value="true" in_defaults="false"
+                <nml_option name="config_noahmp_static" type="logical" default_value="false" in_defaults="true"
                      units="-"
                      description="Whether to process, read, and write static fields only required by Noah-MP"
+                     possible_values="true or false"/>
+
+		<nml_option name="config_urban_static" type="logical" default_value="false" in_defaults="true"
+                     units="-"
+                     description="Whether to process, read, and write static fields only required by urban physics"
                      possible_values="true or false"/>
 
                 <nml_option name="config_use_spechumd"          type="logical"       default_value="false"
@@ -394,6 +403,7 @@
                 <package name="first_guess_field" description="3-d atmospheric or land-surface fields on first-guess levels"/>
                 <package name="microphysics_aerosols" description="Initialization of GOCART-based water- and ice-friendly aerosols for Thompson and TEMPO microphysics"/>
                 <package name="noahmp" description="Whether to process, read, and write static fields only required by Noah-MP"/>
+                <package name="urban" description="Whether to process, read, and write static fields only required by urban physics"/>
                 <package name="qc" description="Whether QC is available for inclusion in ICs and LBCs"/>
                 <package name="qr" description="Whether QR is available for inclusion in ICs and LBCs"/>
         </packages>
@@ -913,6 +923,9 @@
                 <var name="iswater_lu" type="integer" dimensions="" units="unitless" default_value="16"
                      description="Index category for water"/>
 
+                <var name="isurban_lu" type="integer" dimensions="" units="unitless" default_value="13"
+                     description="Index category for urban"/>
+
                 <!-- Some special input static fields needed for the NOAH-MP land surface scheme -->
                 <var name="soilcomp" type="real" dimensions="nSoilComps nCells" units="percent"
                      description="soil composition needed as input in the NOAH-MP land surface model"
@@ -985,6 +998,51 @@
                 <var name="td_fraction" type="real" dimensions="nCells" units="fraction"
                      description="tile drainage fraction needed as input for the NOAH-MP land surface model"
                      packages="noahmp"/>
+
+	        <!-- Some special input static fields for urban physics scheme -->
+                <var name="frc_urb2d" type="real" dimensions="nCells" units="unitless"
+                     description="urban fraction as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="lp_urb2d" type="real" dimensions="nCells" units="m"
+                     description="urban plan area length as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="lb_urb2d" type="real" dimensions="nCells" units="m"
+                     description="urban building length as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="hgt_urb2d" type="real" dimensions="nCells" units="m"
+                     description="urban building height as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="urb_param" type="real" dimensions="nUrbParam nCells" units="unitless"
+                     description="urban parameter matrix as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="mh_urb2d" type="real" dimensions="nCells" units="m"
+                     description="urban mean building height as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="stdh_urb2d" type="real" dimensions="nCells" units="m"
+                     description="standard deviation of urban building height as input in urban canopy model"
+                     packages="urban"/>
+
+		<var name="lf_urb2d" type="real" dimensions="FOUR nCells" units="unitless"
+                     description="urban frontal area index as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="lf_urb2d_s" type="real" dimensions="nCells" units="unitless"
+                     description="urban mean frontal area index as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="z0_urb2d" type="real" dimensions="nCells" units="m"
+                     description="urban roughness length as input in urban canopy model"
+                     packages="urban"/>
+
+                <var name="ahe_urb2d" type="real" dimensions="nCells" units="W m^-2"
+                     description="anthropogenic heat emission as input in urban canopy model"
+                     packages="urban"/>
 
                 <!-- GWDO fields -->
                 <var name="var2d" type="real" dimensions="nCells" units="m"

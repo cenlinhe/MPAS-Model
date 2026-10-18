@@ -35,6 +35,7 @@
 ! adjust_input_soiltemp      : adjust the deep soil temperature to sea-level values.
 ! physics_init_sst           : initialize the skin temperature to the SSTs over oceans.
 ! physics_init_seaice        : correct vegetation and soil typs as function of fractional sea ice.
+! init_urban_param           : initialize urban-related input parameters
 !
 ! add-ons and modifications to sourcecode:
 ! ----------------------------------------
@@ -59,6 +60,8 @@
 !   temperature was originally colder than 271K. We now use the seaice threshold config_tsk_seaice_threshold
 !   that has a default value set to 100K. This leads to decreased seaice at high latitudes.
 !   Laura D. Fowler (laura@ucar.edu) / 2022-03-25.
+! * Add init_urban_param subroutine to process urban-related input parameters
+!   Cenlin He (cenlinhe@ucar.edu) / 2026-10-17
 
 
  contains
@@ -179,6 +182,9 @@
 
 !initialization of soil layers properties:
  call init_soil_layers(mesh,fg,dminfo,dims,configs)
+
+!initialization of urban parameters
+ call init_urban_param(mesh,fg,dminfo,dims,configs)
 
 !initialize seaice points:
  call physics_init_seaice(mesh,fg,dims,configs)
@@ -511,6 +517,111 @@
  if(allocated(sm_input)) deallocate(sm_input)
 
  end subroutine init_soil_layers_properties
+
+!=================================================================================================================
+ subroutine init_urban_param(mesh,fg,dminfo,dims,configs)
+!=================================================================================================================
+! CenlinHe(2026-10-17): moved from WRF dyn_em/module_initialize_real.F to here
+
+!input arguments:
+ type(mpas_pool_type),intent(inout):: mesh
+ type(dm_info),intent(in)  :: dminfo
+ type(mpas_pool_type),intent(in):: dims
+ type(mpas_pool_type),intent(in):: configs
+
+!inout arguments:
+ type(mpas_pool_type),intent(inout):: fg
+
+!local variables:
+ integer:: iCell, isurban_beg
+ character(len=StrKIND),pointer:: mminlu
+ integer, pointer:: nCellsSolve,config_urban_use_lcz
+ integer, pointer:: config_urban_physics,isurban_lu
+ logical, pointer:: config_slucm_distributed_drag
+ integer, dimension(:),pointer:: ivgtyp
+ real(kind=RKIND),dimension(:),pointer:: frc_urb2d,lp_urb2d,lb_urb2d,hgt_urb2d
+ real(kind=RKIND),dimension(:),pointer:: mh_urb2d,stdh_urb2d
+ real(kind=RKIND),dimension(:,:),pointer:: greenfrac,urb_param,lf_urb2d
+
+!-----------------------------------------------------------------------------------------------------------------
+
+ call mpas_pool_get_config(configs,'config_urban_physics',config_urban_physics)
+
+ if (config_urban_physics > 0) then
+
+ call mpas_pool_get_config(configs,'config_urban_use_lcz',config_urban_use_lcz)
+ call mpas_pool_get_config(configs,'config_slucm_distributed_drag',config_slucm_distributed_drag)
+ call mpas_pool_get_dimension(dims, 'nCellsSolve', nCellsSolve)
+ call mpas_pool_get_array(mesh,'isurban_lu',isurban_lu)
+ call mpas_pool_get_array(mesh,'greenfrac',greenfrac)
+ call mpas_pool_get_array(mesh,'ivgtyp',ivgtyp)
+ call mpas_pool_get_array(mesh,'frc_urb2d',frc_urb2d)
+ call mpas_pool_get_array(mesh,'mminlu',mminlu)
+ call mpas_pool_get_array(mesh,'lp_urb2d',lp_urb2d)
+ call mpas_pool_get_array(mesh,'lb_urb2d',lb_urb2d)
+ call mpas_pool_get_array(mesh,'hgt_urb2d',hgt_urb2d)
+ call mpas_pool_get_array(mesh,'urb_param',urb_param)
+ call mpas_pool_get_array(mesh,'mh_urb2d',mh_urb2d)
+ call mpas_pool_get_array(mesh,'stdh_urb2d',stdh_urb2d)
+ call mpas_pool_get_array(mesh,'lf_urb2d',lf_urb2d)
+
+ if (config_urban_use_lcz == 1) then
+    isurban_beg = 50   ! LCZ number starts from 51 to 61
+ endif
+
+ !Split WUDAPT/NUDAPT Urban Parameters
+ if ((config_urban_physics == 1) .and. config_slucm_distributed_drag) then
+    do iCell = 1, nCellsSolve
+       if ((ivgtyp(iCell) == isurban_lu) .or. (ivgtyp(iCell) > isurban_beg)) then
+          frc_urb2d(iCell) = max(0.1,min(0.9,1.0 - sum(greenfrac(:,iCell))/100.))
+       endif
+    enddo 
+ else
+    if (config_urban_physics > 0) then
+       do iCell = 1, nCellsSolve
+          if ((mminlu == 'NLCD40') .or. (mminlu == 'MODIFIED_IGBP_MODIS_NOAH')) then
+             if ((frc_urb2d(iCell)>=0.5) .and. &
+                 (ivgtyp(iCell) .ne. 13 .and. ivgtyp(iCell) .ne. 24 .and. ivgtyp(iCell) .ne. 25 .and. &
+                  ivgtyp(iCell) .ne. 26 .and. ivgtyp(iCell) <= isurban_beg) ) then
+                ivgtyp(iCell) = 13
+             endif
+          elseif (mminlu == 'USGS') then
+             if ((frc_urb2d(iCell)>=0.5) .and. &
+                 (ivgtyp(iCell) .ne. 1 .and. ivgtyp(iCell) <= isurban_beg) ) then
+                ivgtyp(iCell) = 1
+             endif             
+          endif
+
+          if (frc_urb2d(iCell) == 0.0) then
+             if ( (mminlu == 'NLCD40' .or. mminlu == 'MODIFIED_IGBP_MODIS_NOAH') .and. &
+                 (ivgtyp(iCell)==24 .or. ivgtyp(iCell)==25 .or. ivgtyp(iCell)==26 .or. &
+                  ivgtyp(iCell)==13) ) then
+                frc_urb2d(iCell) = 0.9
+             endif
+             if (mminlu == 'USGS' .and. ivgtyp(iCell)==1 ) frc_urb2d(iCell) = 0.9
+          endif
+          lp_urb2d(iCell)  = urb_param(91,iCell)
+          lb_urb2d(iCell)  = urb_param(95,iCell)
+          hgt_urb2d(iCell) = urb_param(94,iCell)
+       enddo
+    endif  ! config_urban_physics > 0
+
+    if (config_urban_physics == 1) then
+       do iCell = 1, nCellsSolve
+          mh_urb2d(iCell)   = urb_param(92,iCell)
+          stdh_urb2d(iCell) = urb_param(93,iCell)
+          lf_urb2d(1,iCell) = urb_param(96,iCell)
+          lf_urb2d(2,iCell) = urb_param(97,iCell)
+          lf_urb2d(3,iCell) = urb_param(98,iCell)
+          lf_urb2d(4,iCell) = urb_param(99,iCell)
+       enddo
+    endif
+
+ endif ! split URB_PARAM matrix
+
+ endif !config_urban_physics > 0
+
+ end subroutine init_urban_param
 
 !=================================================================================================================
  subroutine physics_init_sst(mesh, input, dims, configs)

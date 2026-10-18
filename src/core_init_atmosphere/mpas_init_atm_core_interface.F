@@ -127,7 +127,7 @@ module init_atm_core_interface
       logical, pointer :: microphysics_aerosols
       integer, pointer :: config_init_case
       logical, pointer :: noahmp, config_noahmp_static
-
+      logical, pointer :: urban, config_urban_static
 
       ierr = init_atm_setup_packages_when(configs, packages)
       if (ierr /= 0) then
@@ -310,6 +310,32 @@ module init_atm_core_interface
          call mpas_log_write('* Error while setting up packages for init_atmosphere core:',                      &
                              messageType=MPAS_LOG_ERR)
          call mpas_log_write('*    Either the ''noahmp'' package or the ''config_noahmp_static'' namelist',      &
+                             messageType=MPAS_LOG_ERR)
+         call mpas_log_write('*    option is not defined.', &
+                             messageType=MPAS_LOG_ERR)
+         call mpas_log_write('********************************************************************************', &
+                             messageType=MPAS_LOG_ERR)
+         ierr = 1
+         return
+      end if
+
+      !
+      ! Urban
+      !
+      nullify(config_urban_static)
+      call mpas_pool_get_config(configs, 'config_urban_static', config_urban_static)
+
+      nullify(urban)
+      call mpas_pool_get_package(packages, 'urbanActive', urban)
+
+      if (associated(config_urban_static) .and. associated(urban)) then
+         urban = config_urban_static
+      else 
+         call mpas_log_write('********************************************************************************', &
+                             messageType=MPAS_LOG_ERR)
+         call mpas_log_write('* Error while setting up packages for init_atmosphere core:',                      &
+                             messageType=MPAS_LOG_ERR)
+         call mpas_log_write('*    Either the ''urban'' package or the ''config_urban_static'' namelist',      &
                              messageType=MPAS_LOG_ERR)
          call mpas_log_write('*    option is not defined.', &
                              messageType=MPAS_LOG_ERR)
