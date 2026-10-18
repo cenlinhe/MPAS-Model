@@ -73,10 +73,12 @@ fi
 which git
 if [ $? -eq 0 ]; then
    echo "*** Trying git to obtain WRF physics tables ***"
-   git clone https://github.com/${github_org}/MPAS-Data.git
+#   git clone https://github.com/${github_org}/MPAS-Data.git
+   git clone https://github.com/cenlinhe/MPAS-Data.git  # che: for test purpose
    if [ $? -eq 0 ]; then
       cd MPAS-Data
-      git checkout v${mpas_vers}
+#      git checkout v${mpas_vers}
+      git checkout urban_add
       if [ $? -ne 0 ]; then
          echo "*** MPAS version-specific tag not found; trying the master branch ***"
       else

@@ -72,7 +72,7 @@
 !=================================================================================================================
 
 !input arguments:
- type (mpas_pool_type), intent(in) :: mesh
+ type (mpas_pool_type), intent(inout) :: mesh
  type (dm_info), intent(in) :: dminfo
  type (mpas_pool_type), intent(in) :: dims
  type (mpas_pool_type), intent(in) :: configs
