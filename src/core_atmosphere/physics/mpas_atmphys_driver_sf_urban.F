@@ -372,7 +372,7 @@
                        T2 = t2mxy, Q2 = q2mxy, PSFC = psfc, TH2 = th2m, U10 = u10, V10 = v10,  &
                        PSIM = psim, PSIH = psih, GZ1OZ0 = gz1oz0,                              &
                        distributed_ahe_opt = config_distributed_ahe, gmt = gmt,                &
-                       xtime =xtime_m, ahe_urb2d = ahe_urb2d, ust = ust,                       &
+                       xtime =xtime_m, ahe_urb2d = ahe_urb2d, ust = ust                        &
                        !--- multi-layer urban vars below (make optional; no BEP,BEM coupling now)
                        !num_urban_ndm, urban_map_zrd, urban_map_zwd, urban_map_gd,             &
                        !urban_map_zd, urban_map_zdf,  urban_map_bd, urban_map_wd,              &
