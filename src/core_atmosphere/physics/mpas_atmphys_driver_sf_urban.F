@@ -377,7 +377,7 @@
                        !sfw1_urb3d, sfw2_urb3d, sfr_urb3d, sfg_urb3d, ep_pv_urb3d, t_pv_urb3d, & 
                        !trv_urb4d, qr_urb4d, qgr_urb3d, tgr_urb3d, drain_urb4d, draingr_urb3d, &
                        !sfrv_urb3d, lfrv_urb3d, dgr_urb3d, dg_urb3d, lfr_urb3d, lfg_urb3d,     &
-                       !hi_urb2d, th_phy, rho, p_phy, ust, gmt, julday, xlong, xlat,           &
+                       !hi_urb2d, th_phy, rho, p_phy, ust, julday, xlong, xlat,                &
                        !a_u_bep, a_v_bep, a_t_bep, a_q_bep, a_e_bep, b_u_bep, b_v_bep,         &
                        !b_t_bep, b_q_bep, b_e_bep, dlg_bep, dl_u_bep, sf_bep, vl_bep           &
                       )
