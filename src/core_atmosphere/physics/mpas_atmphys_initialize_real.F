@@ -565,11 +565,8 @@
  call mpas_pool_get_array(mesh,'stdh_urb2d',stdh_urb2d)
  call mpas_pool_get_array(mesh,'lf_urb2d',lf_urb2d)
 
- if (config_urban_use_lcz == 1) then
-    isurban_beg = 50   ! LCZ number starts from 51 to 61
- endif
-
  !Split WUDAPT/NUDAPT Urban Parameters
+ isurban_beg = 50   ! LCZ number starts from 51 to 61
  if ((config_urban_physics == 1) .and. config_slucm_distributed_drag) then
     do iCell = 1, nCellsSolve
        if ((ivgtyp(iCell) == isurban_lu) .or. (ivgtyp(iCell) > isurban_beg)) then

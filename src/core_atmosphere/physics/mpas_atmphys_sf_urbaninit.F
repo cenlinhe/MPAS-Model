@@ -101,6 +101,12 @@
  call mpas_pool_get_array(diag_physics_slucm,'dzb', dzb )
  call mpas_pool_get_array(diag_physics_slucm,'dzg', dzg )
 
+! given the current hard-wired 4 layers for soil/road/wall/roof inside SLUCM code, put this as a safeguard here
+ if (nSoilLevels /= 4 .or. num_roof_layers /= 4 .or. &
+     num_wall_layers /= 4 .or. num_road_layers /= 4) then
+    call physics_error_fatal('Current SLUCM code requires four layers')
+ endif
+
 ! read urban lookup table parameters
  call urban_param_init(dzr,dzb,dzg,nSoilLevels,sf_urban_physics,use_wudapt_lcz, &
                        slucm_distributed_drag,num_roof_layers,num_wall_layers,num_road_layers)

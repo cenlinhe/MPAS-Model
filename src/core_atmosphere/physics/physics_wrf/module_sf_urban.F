@@ -1012,6 +1012,8 @@ USE mpas_kind_types
    PS=RHOO*287.*TAV/100. ![hPa]
 
    ! ===Yuqi Huang, 2024/07, urban tree & vegetation variables for UCM based on ASLUM
+   SROOT  = 0.0
+   TGE    = (1.0 - FVG)*TG + FVG*TVG
    TVGP   = TVG
    TGEP   = TGE
    CMCGP  = CMCG
@@ -3820,10 +3822,9 @@ ENDIF
       END IF distributed_aerodynamics_check										   
 
 
-      QC_URB2D(I)=0.01
+      IF (.not.restart) THEN
 
-       IF (.not.restart) THEN
-
+      QC_URB2D(I)=0.01 
       XXXR_URB2D(I)=0.
       XXXB_URB2D(I)=0.
       XXXG_URB2D(I)=0.
@@ -3990,7 +3991,7 @@ ENDIF
 
 
       IF (CHECK.EQ.0)THEN
-      IF(IVGTYP(I).EQ.1)THEN
+      IF(IVGTYP(I).EQ.13)THEN
         write(mesg,*) 'Sample of Urban settings'
         WRITE_MESSAGE(mesg)
         write(mesg,*) 'TSURFACE0_URB',TSURFACE0_URB(I)
@@ -4021,24 +4022,24 @@ ENDIF
         WRITE_MESSAGE(mesg)
         write(mesg,*) 'TS_URB2D',TS_URB2D(I)
         WRITE_MESSAGE(mesg)
-        write(mesg,*) 'LF_AC_URB3D', LF_AC_URB3D(I)
-        WRITE_MESSAGE(mesg)
-        write(mesg,*) 'SF_AC_URB3D', SF_AC_URB3D(I)
-        WRITE_MESSAGE(mesg)
-        write(mesg,*) 'CM_AC_URB3D', CM_AC_URB3D(I)
-        WRITE_MESSAGE(mesg)
-        write(mesg,*) 'SFVENT_URB3D', SFVENT_URB3D(I)
-        WRITE_MESSAGE(mesg)
-        write(mesg,*) 'LFVENT_URB3D', LFVENT_URB3D(I)
-        WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'LF_AC_URB3D', LF_AC_URB3D(I)
+       ! WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'SF_AC_URB3D', SF_AC_URB3D(I)
+       ! WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'CM_AC_URB3D', CM_AC_URB3D(I)
+       ! WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'SFVENT_URB3D', SFVENT_URB3D(I)
+       ! WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'LFVENT_URB3D', LFVENT_URB3D(I)
+       ! WRITE_MESSAGE(mesg)
         write(mesg,*) 'FRC_URB2D', FRC_URB2D(I)
         WRITE_MESSAGE(mesg)
         write(mesg,*) 'UTYPE_URB2D', UTYPE_URB2D(I)
         WRITE_MESSAGE(mesg)
         write(mesg,*) 'I',I
         WRITE_MESSAGE(mesg)
-        write(mesg,*) 'num_urban_hi', num_urban_hi
-        WRITE_MESSAGE(mesg)
+       ! write(mesg,*) 'num_urban_hi', num_urban_hi
+       ! WRITE_MESSAGE(mesg)
         CHECK = 1
        END IF
        END IF

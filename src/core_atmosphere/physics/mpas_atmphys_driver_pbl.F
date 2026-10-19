@@ -737,7 +737,7 @@
     call mpas_pool_get_array(output_urban,'dz8w',dz8w)
     
     call cal_mon_day(int(curr_julday) + 1, year, jmonth, jday)
-    ihour = (jmonth - 1) * 24 + mod(int(gmt + xtime_m / 60.0), 24)
+    ihour = 1 + (jmonth - 1) * 24 + mod(int(gmt + xtime_m / 60.0), 24) ! convert ihour from 0-based to 1-based
     do i = its, ite
        ! Volumetric heat capacity of air = 1200 J/(K m3)
        rthblten(1,i) = rthblten(1,i) + ahe_urb2d(ihour,i)/1200.0/dz8w(1,i)
