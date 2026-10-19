@@ -533,7 +533,7 @@
  end subroutine pbl_from_MPAS
 
 !=================================================================================================================
- subroutine pbl_to_MPAS(configs,diag_physics,tend_physics,its,ite)
+ subroutine pbl_to_MPAS(configs,diag_physics,tend_physics,sfc_input,output_urban,its,ite)
 !=================================================================================================================
 
 !input arguments:
@@ -542,6 +542,8 @@
 !inout arguments:
  type(mpas_pool_type),intent(inout):: diag_physics
  type(mpas_pool_type),intent(inout):: tend_physics
+ type(mpas_pool_type),intent(inout):: sfc_input
+ type(mpas_pool_type),intent(inout):: output_urban
 
  integer,intent(in):: its,ite
 
@@ -775,7 +777,7 @@
  end subroutine init_pbl
 
 !=================================================================================================================
- subroutine driver_pbl(itimestep,configs,mesh,sfc_input,diag_physics,tend_physics,its,ite)
+ subroutine driver_pbl(itimestep,configs,mesh,sfc_input,diag_physics,tend_physics,output_urban,its,ite)
 !=================================================================================================================
 
 !input arguments:
@@ -789,6 +791,7 @@
  type(mpas_pool_type),intent(inout):: sfc_input
  type(mpas_pool_type),intent(inout):: diag_physics
  type(mpas_pool_type),intent(inout):: tend_physics
+ type(mpas_pool_type),intent(inout):: output_urban
 
 !local pointers:
  logical,pointer:: config_do_DAcycling, &
@@ -987,7 +990,7 @@
  end select pbl_select
 
 !copy local arrays to MPAS grid:
- call pbl_to_MPAS(configs,diag_physics,tend_physics,its,ite)
+ call pbl_to_MPAS(configs,diag_physics,tend_physics,sfc_input,output_urban,its,ite)
 
 !call mpas_log_write('--- end subroutine driver_pbl.')
 

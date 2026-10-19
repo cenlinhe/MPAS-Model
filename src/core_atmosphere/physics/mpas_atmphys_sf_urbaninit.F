@@ -59,8 +59,6 @@
  type(mpas_pool_type),intent(inout) :: sfc_input
  type(mpas_pool_type),intent(inout) :: diag_physics_urban
  type(mpas_pool_type),intent(inout) :: diag_physics_slucm
- type(mpas_pool_type),intent(inout) :: output_urban
- type(mpas_pool_type),intent(inout) :: output_slucm
 
 ! local pointer
  logical,pointer :: slucm_distributed_drag,do_restart
@@ -109,7 +107,7 @@
 
 
 !--------- call main urban initialization subroutine -----------
- if ( present(frc_urb2d) .and. present(utype_urb2d) ) then
+ if ( associated(frc_urb2d) .and. associated(utype_urb2d) ) then
 
      ! generic MPAS variables
      call mpas_pool_get_config(configs,'config_do_restart',do_restart )
@@ -212,7 +210,7 @@
 
      call physics_error_fatal('arguments not present for calling urban model')
 
- endif ! present(frc_urb2d)&(utype_urb2d)
+ endif ! associated(frc_urb2d)&(utype_urb2d)
 
  end subroutine init_sf_urban
 
