@@ -397,8 +397,6 @@ module atm_core
       type (mpas_pool_type), pointer :: output_noahmp
       type (mpas_pool_type), pointer :: diag_physics_urban
       type (mpas_pool_type), pointer :: diag_physics_slucm
-      type (mpas_pool_type), pointer :: output_urban
-      type (mpas_pool_type), pointer :: output_slucm
 
       integer :: iCell,iEdge,iVertex,k
       
@@ -592,8 +590,6 @@ module atm_core
          call mpas_pool_get_subpool(block % structs, 'output_noahmp', output_noahmp)
          call mpas_pool_get_subpool(block % structs, 'diag_physics_urban', diag_physics_urban)
          call mpas_pool_get_subpool(block % structs, 'diag_physics_slucm', diag_physics_slucm)
-         call mpas_pool_get_subpool(block % structs, 'output_urban', output_urban)
-         call mpas_pool_get_subpool(block % structs, 'output_slucm', output_slucm)
          call physics_tables_init(dminfo, block % configs)
          call physics_registry_init(mesh, block % configs, sfc_input)
          call physics_run_init(block % configs, mesh, state, clock, stream_manager)
@@ -601,7 +597,7 @@ module atm_core
          !initialization of all physics:
          call physics_init(dminfo, stream_manager, clock, block % configs, mesh, diag, tend, tend_physics, state, 1, &
                            diag_physics, diag_physics_noahmp, ngw_input, atm_input, sfc_input, output_noahmp, &
-                           diag_physics_urban,diag_physics_slucm,output_urban,output_slucm)
+                           diag_physics_urban,diag_physics_slucm)
       endif
 #endif
    

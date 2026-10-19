@@ -58,7 +58,7 @@
 !=================================================================================================================
  subroutine driver_sf_urban(configs,mesh,diag,state,itimestep,time_lev,xtime_s, &
                             sfc_input,diag_physics,diag_physics_slucm,output_slucm, &
-                            diag_physics_urban,output_urban,its,ite)
+                            diag_physics_urban,output_urban,output_noahmp,its,ite)
 !=================================================================================================================
 
 !--- input arguments:
@@ -77,9 +77,10 @@
  type(mpas_pool_type),intent(inout) :: sfc_input
  type(mpas_pool_type),intent(inout) :: diag_physics_urban
  type(mpas_pool_type),intent(inout) :: output_urban
+ type(mpas_pool_type),intent(inout) :: output_noahmp
 
 ! local variables:
- integer:: i,k
+ integer:: i,k,ierr
  character(len=StrKIND),pointer :: microp_scheme,convection_scheme
  real(kind=RKIND) :: fzm,fzp,mult,totm,totp
  real(kind=RKIND) :: w1,w2,z0,z1,z2
@@ -117,13 +118,14 @@
  real(kind=RKIND),dimension(:),pointer :: cmcg_urb2d,frc_urb2d,mh_urb2d
  real(kind=RKIND),dimension(:),pointer :: flxhumvg_urb2d,flxhumt_urb2d
  real(kind=RKIND),dimension(:),pointer :: hgt_urb2d,lb_urb2d,lp_urb2d
- real(kind=RKIND),dimension(:),pointer :: stdh_urb2d,lf_urb2d_s,z0_urb2
+ real(kind=RKIND),dimension(:),pointer :: stdh_urb2d,lf_urb2d_s,z0_urb2d
  real(kind=RKIND),dimension(:),pointer :: t2mxy,q2mxy,psfc,th2m,u10,v10,psim,psih,gz1oz0
-
+ real(kind=RKIND),dimension(:),pointer :: chs,chs2,cqs2
+                    
  real(kind=RKIND),dimension(:,:),pointer :: trl_urb3d,tgrl_urb3d,smr_urb3d
  real(kind=RKIND),dimension(:,:),pointer :: tbl_urb3d
  real(kind=RKIND),dimension(:,:),pointer :: tgl_urb3d,tvgl_urb3d,smg_urb3d
- real(kind=RKIND),dimension(:,:),pointer :: lf_urb2d
+ real(kind=RKIND),dimension(:,:),pointer :: lf_urb2d,ahe_urb2d
 
 !-----------------------------------------------------------------------------------------------------------------
 !call mpas_log_write('')
@@ -225,7 +227,8 @@
      ! pass in other direct mpas variables
      ! generic mpas variables
      call mpas_pool_get_config(configs,'config_distributed_ahe',config_distributed_ahe)
-     call mpas_get_timeInterval(mpas_get_clock_timestep(clock, ierr), dt=dt)
+     !call mpas_get_timeInterval(mpas_get_clock_timestep(clock, ierr), dt=dt)
+     call mpas_pool_get_config(configs,'config_dt',dt)
      call mpas_pool_get_dimension(mesh ,'nSoilLevels',nSoilLevels    )
      call mpas_pool_get_dimension(mesh ,'nRoofLevels',num_roof_layers)
      call mpas_pool_get_dimension(mesh ,'nWallLevels',num_wall_layers)
@@ -263,6 +266,9 @@
      call mpas_pool_get_array(diag_physics,'u10'      ,u10      )
      call mpas_pool_get_array(diag_physics,'v10'      ,v10      )
      call mpas_pool_get_array(diag_physics,'gz1oz0'   ,gz1oz0   )
+     call mpas_pool_get_array(diag_physics,'chs'      ,chs      )
+     call mpas_pool_get_array(diag_physics,'chs2'     ,chs2     )
+     call mpas_pool_get_array(diag_physics,'cqs2'     ,cqs2     )
      ! noahmp diagnostic variable
      call mpas_pool_get_array(output_noahmp,'t2mxy'   ,t2mxy    )
      call mpas_pool_get_array(output_noahmp,'q2mxy'   ,q2mxy    )
@@ -357,7 +363,7 @@
                        xxxvg_urb2d = xxxvg_urb2d,tvgl_urb3d = tvgl_urb3d,smg_urb3d = smg_urb3d,&
                        tt_urb2d = tt_urb2d, cmcg_urb2d = cmcg_urb2d,                           &
                        flxhumvg_urb2d = flxhumvg_urb2d, flxhumt_urb2d = flxhumt_urb2d,         &
-                       julian = curr_julday, julyr = year, frc_urb2d = frc_urb2d,              &
+                       julian = int(curr_julday), julyr = year, frc_urb2d = frc_urb2d,         &
                        utype_urb2d = utype_urb2d, chs = chs, chs2 = chs2, cqs2 = cqs2,         &
                        lp_urb2d = lp_urb2d, lb_urb2d = lb_urb2d, hgt_urb2d = hgt_urb2d,        &
                        mh_urb2d = mh_urb2d, stdh_urb2d = stdh_urb2d, lf_urb2d = lf_urb2d,      &

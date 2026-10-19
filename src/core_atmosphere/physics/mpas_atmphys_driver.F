@@ -323,7 +323,7 @@
                 do thread=1,nThreads ! due to use of mpas_noahmp in urban, it does not work with OpenMP
                    call driver_sf_urban(block%configs,mesh,diag,state,itimestep,time_lev,xtime_s, &
                                        sfc_input,diag_physics,diag_physics_slucm,output_slucm, &
-                                       diag_physics_urban,output_urban,&
+                                       diag_physics_urban,output_urban,output_noahmp, &
                                        cellSolveThreadStart(thread),cellSolveThreadEnd(thread))
                 enddo
              endif
