@@ -14,7 +14,7 @@
  use mpas_atmphys_constants
  use mpas_atmphys_vars
  use mpas_atmphys_date_time, only: cal_mon_day
- use mpas_atmphys_manager, only : gmt,curr_julday,year,xtime_m 
+ use mpas_atmphys_manager, only : gmt,julday,year,xtime_m 
 
  use bl_mynn,only: bl_mynn_init
  use module_bl_mynn,only: mynn_bl_driver
@@ -736,7 +736,7 @@
     call mpas_pool_get_array(sfc_input,'ahe_urb2d',ahe_urb2d)
     call mpas_pool_get_array(output_urban,'dz8w',dz8w)
     
-    call cal_mon_day(int(curr_julday) + 1, year, jmonth, jday)
+    call cal_mon_day(julday, year, jmonth, jday)
     ihour = 1 + (jmonth - 1) * 24 + mod(int(gmt + xtime_m / 60.0), 24) ! convert ihour from 0-based to 1-based
     do i = its, ite
        ! Volumetric heat capacity of air = 1200 J/(K m3)

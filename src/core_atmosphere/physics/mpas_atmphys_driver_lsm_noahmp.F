@@ -13,7 +13,7 @@
  use mpas_timer,only: mpas_timer_start, mpas_timer_stop
 
  use mpas_atmphys_constants, only : R_d,R_v
- use mpas_atmphys_manager,   only : year,curr_julday,month,day
+ use mpas_atmphys_manager,   only : year,curr_julday,julday,month,day
  use mpas_atmphys_vars,      only : mpas_noahmp,xice_threshold
 
  use module_sf_urban,        only : iri_scheme
@@ -135,7 +135,8 @@
  mpas_noahmp%yr           = year
  mpas_noahmp%month        = month
  mpas_noahmp%day          = day
- mpas_noahmp%julian       = curr_julday 
+ mpas_noahmp%julian       = curr_julday
+ mpas_noahmp%julday       = julday 
  mpas_noahmp%iri_urban    = iri_scheme  ! connect to iri_scheme in URBPARM.TBL when coupling urban
 
 !--- initialization of xice_threshold:

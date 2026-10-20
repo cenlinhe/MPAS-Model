@@ -16,7 +16,7 @@
  use mpas_pool_routines
  use mpas_timer,           only : mpas_timer_start,mpas_timer_stop
  use mpas_timekeeping,     only : mpas_get_timeInterval,mpas_get_clock_timestep
- use mpas_atmphys_manager, only : gmt,curr_julday,year,month,day 
+ use mpas_atmphys_manager, only : gmt,julday,year,month,day 
 
  use mpas_atmphys_constants
  use mpas_atmphys_vars     ! mpas_noahmp is included here
@@ -364,7 +364,7 @@
                        xxxvg_urb2d = xxxvg_urb2d,tvgl_urb3d = tvgl_urb3d,smg_urb3d = smg_urb3d,&
                        tt_urb2d = tt_urb2d, cmcg_urb2d = cmcg_urb2d,                           &
                        flxhumvg_urb2d = flxhumvg_urb2d, flxhumt_urb2d = flxhumt_urb2d,         &
-                       julian = int(curr_julday), julyr = year, frc_urb2d = frc_urb2d,         &
+                       julian = julday, julyr = year, frc_urb2d = frc_urb2d,         &
                        utype_urb2d = utype_urb2d, chs = chs, chs2 = chs2, cqs2 = cqs2,         &
                        lp_urb2d = lp_urb2d, lb_urb2d = lb_urb2d, hgt_urb2d = hgt_urb2d,        &
                        mh_urb2d = mh_urb2d, stdh_urb2d = stdh_urb2d, lf_urb2d = lf_urb2d,      &
