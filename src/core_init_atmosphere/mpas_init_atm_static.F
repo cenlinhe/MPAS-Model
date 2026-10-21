@@ -1958,6 +1958,14 @@
 
     surfvar_msgval = missing_value
 
+    ! These NCAR WPS SLUCM datasets store missing pixels as unsigned
+    ! 32-bit integers with all bits set. Their index files give
+    ! the scaled missing value, but accumulation uses raw pixels.
+    if (trim(fieldname) == 'lf_urb2d_s' .or. &
+       trim(fieldname) == 'z0_urb2d') then
+       surfvar_msgval = real(4294967295_I8KIND, kind=RKIND)
+    endif
+
     allocate(surfvar_integer(nCells))
     allocate(nhs(nCells))
 

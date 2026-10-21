@@ -125,6 +125,8 @@ module mpas_geotile_manager
         real (kind=RKIND), pointer :: dx ! Grid spacing in the x-direction
         real (kind=RKIND), pointer :: dy ! Grid spacing in the y-direction
         real (kind=RKIND), pointer :: scalefactor
+        real(kind=RKIND), pointer :: known_x, known_y
+        real(kind=RKIND), pointer :: known_lat, known_lon
         logical :: res
 
         ! Return variable
@@ -281,6 +283,16 @@ module mpas_geotile_manager
         call mpas_pool_get_config(mgr % pool, 'tile_y', tile_ny)
         call mpas_pool_get_config(mgr % pool, 'dx', dx)
         call mpas_pool_get_config(mgr % pool, 'dy', dy)
+        ! Express the reference coordinates at pixel (1,1).
+        ! The coordinate-conversion routines assume this reference.
+        call mpas_pool_get_config(mgr % pool, 'known_x', known_x)
+        call mpas_pool_get_config(mgr % pool, 'known_y', known_y)
+        call mpas_pool_get_config(mgr % pool, 'known_lat', known_lat)
+        call mpas_pool_get_config(mgr % pool, 'known_lon', known_lon)
+        known_lon = known_lon - (known_x - 1.0_RKIND) * dx
+        known_lat = known_lat - (known_y - 1.0_RKIND) * dy
+        known_x = 1.0_RKIND
+        known_y = 1.0_RKIND
 
         ! Calculate the total number of pixels in x dir
         ! NOTE: This calculation assumes that a dataset is a global dataset and may
