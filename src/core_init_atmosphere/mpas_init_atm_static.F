@@ -1770,7 +1770,8 @@
 
      if (landmask(iCell) == 0) return
 
-     if (pixel(1) /= surfvar_msgval) then
+     !if (pixel(1) /= surfvar_msgval) then
+     if (any(pixel(:) /= surfvar_msgval)) then ! Accept the column if at least one layer is valid
         surfvar3d_integer(:,iCell) = surfvar3d_integer(:,iCell) + int(pixel(:), kind=I8KIND)
         nhs(iCell) = nhs(iCell) + 1
      end if
@@ -1963,7 +1964,11 @@
     ! the scaled missing value, but accumulation uses raw pixels.
     if (trim(fieldname) == 'lf_urb2d_s' .or. &
        trim(fieldname) == 'z0_urb2d') then
-       surfvar_msgval = real(4294967295_I8KIND, kind=RKIND)
+       ! NCAR index: missing_value=4294967.295, scale_factor=0.001.
+       ! Raw missing value is 4294967295 (unsigned 32-bit all ones).
+       ! The current read_geogrid.c decodes this bit pattern as -1.
+       !surfvar_msgval = real(4294967295_I8KIND, kind=RKIND)
+       surfvar_msgval = -1.0_RKIND
     endif
 
     allocate(surfvar_integer(nCells))
