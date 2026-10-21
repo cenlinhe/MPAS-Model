@@ -2189,7 +2189,8 @@
 
     ! Local variables
     type (mpas_geotile_mgr_type) :: mgr
-    integer, pointer :: nCells, ndims_z
+    integer, pointer :: nCells
+    integer :: ndims_z
 
     real (kind=RKIND), dimension(:,:), pointer :: surfvar3D
     real (kind=RKIND), pointer :: missing_value
