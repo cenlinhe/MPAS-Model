@@ -554,7 +554,7 @@
  call mpas_pool_get_dimension(dims, 'nCellsSolve', nCellsSolve)
  call mpas_pool_get_array(mesh,'isurban_lu',isurban_lu)
  call mpas_pool_get_array(mesh,'greenfrac',greenfrac)
- call mpas_pool_get_array(mesh,'ivgtyp',ivgtyp)
+ call mpas_pool_get_array(mesh,'lu_index',ivgtyp)
  call mpas_pool_get_array(mesh,'frc_urb2d',frc_urb2d)
  call mpas_pool_get_array(mesh,'mminlu',mminlu)
  call mpas_pool_get_array(mesh,'lp_urb2d',lp_urb2d)
