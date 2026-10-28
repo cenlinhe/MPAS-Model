@@ -3568,6 +3568,9 @@ ENDIF
                              B_T_BEP,B_Q_BEP,B_E_BEP,DLG_BEP,              & ! inout multi-layer urban
                              DL_U_BEP,SF_BEP,VL_BEP,                       & ! inout multi-layer urban
                              FRC_URB2D, UTYPE_URB2D,USE_WUDAPT_LCZ)                         ! inout
+
+   USE, INTRINSIC :: ieee_arithmetic, ONLY: ieee_is_finite
+
    IMPLICIT NONE
 
    INTEGER, INTENT(IN) :: ISURBAN, sf_urban_physics,use_wudapt_lcz
@@ -3712,6 +3715,7 @@ ENDIF
    INTEGER :: SWITCH_URB
 
    INTEGER :: I,J,K,CHECK
+   LOGICAL :: UCP_valid
 
    CHECK = 0
 
@@ -3773,9 +3777,30 @@ ENDIF
 
             IF (SWITCH_URB == 1) THEN
                UTYPE_URB = UTYPE_URB2D(I)  ! for default. high-intensity
-               IF (HGT_URB2D(I)>0.) THEN
-                  CONTINUE
-               ELSE
+
+              !IF (HGT_URB2D(I)>0.) THEN
+
+              ! Preserve the existing criterion for the unused BEP/BEM options.
+              UCP_valid = HGT_URB2D(I) > 0.0
+
+              IF (sf_urban_physics == 1) THEN
+                 ! Check finiteness separately before making numerical comparisons.
+                 UCP_valid = ALL(ieee_is_finite((/ HGT_URB2D(I), MH_URB2D(I), STDH_URB2D(I), &
+                                 LP_URB2D(I), LB_URB2D(I), LF_URB2D(:,I) /)))
+                 IF (UCP_valid) THEN
+                    UCP_valid = HGT_URB2D(I)  > 0.0 .AND. &
+                                MH_URB2D(I)   > 0.0 .AND. &
+                                STDH_URB2D(I) > 0.0 .AND. &
+                                LP_URB2D(I)   > 0.0 .AND. &
+                                LP_URB2D(I)   < 1.0 .AND. &
+                                LB_URB2D(I)   > LP_URB2D(I) .AND. &
+                                ALL(LF_URB2D(:,I) > 0.0)
+                 ENDIF
+              ENDIF
+
+              IF (UCP_valid) THEN
+                 CONTINUE
+              ELSE
                   WRITE(mesg,*) 'USING DEFAULT URBAN MORPHOLOGY'
                   WRITE_MESSAGE(mesg)
                   LP_URB2D(I)=0.
